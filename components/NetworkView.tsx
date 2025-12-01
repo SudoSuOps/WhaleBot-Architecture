@@ -1,4 +1,11 @@
-import React from "react";
-export default function NetworkView() {
-  return (<div className="text-whale-light"><h1 className="text-2xl font-bold mb-4">Network / Zero-Trust</h1><p>Network + VPN / Command center placeholder.</p></div>);
-}
+import React, { useState, useEffect } from 'react';
+import { Globe, Shield, Wifi, Server, MapPin, Zap, Lock, CheckCircle, Smartphone, Activity } from 'lucide-react';
+const NetworkView: React.FC = () => {
+  const [latency, setLatency] = useState({ frankfurt: 3, london: 8, tokyo: 145, newyork: 95 });
+  useEffect(() => { const interval = setInterval(() => { setLatency(prev => ({ frankfurt: Math.max(2, prev.frankfurt + (Math.random() > 0.5 ? 1 : -1)), london: Math.max(5, prev.london + (Math.random() > 0.5 ? 1 : -1)), tokyo: Math.max(140, prev.tokyo + (Math.random() > 0.5 ? 2 : -2)), newyork: Math.max(90, prev.newyork + (Math.random() > 0.5 ? 2 : -2)), })); }, 1000); return () => clearInterval(interval); }, []);
+  const TierCard = ({ title, price, features }: any) => (<div className="p-6 rounded-xl bg-whale-900 border border-whale-700 flex flex-col h-full"><h3 className="text-xl font-bold text-white mb-1">{title}</h3><div className="mb-6"><span className="text-3xl font-mono font-bold text-white">${price}</span><span className="text-slate-500">/mo</span></div><ul className="space-y-3 mb-8 flex-1">{features.map((f: string, i: number) => (<li key={i} className="flex items-start gap-2 text-sm text-slate-300"><CheckCircle size={16} className="mt-0.5 text-slate-600" />{f}</li>))}</ul><button className="w-full py-3 rounded-lg font-bold bg-whale-800 hover:bg-whale-700 text-white border border-whale-600">DEPLOY</button></div>);
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12"><div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-8"><h1 className="text-4xl font-black text-white tracking-tighter mb-4">WHALE TUNNEL NETWORK</h1><p className="text-lg text-slate-400">Trader-grade routing infrastructure.</p></div><div className="bg-whale-900 border border-whale-700 rounded-xl p-6"><h3 className="text-white font-bold mb-4 flex items-center gap-2"><Wifi size={18}/> LIVE LATENCY</h3><div className="space-y-4"><div className="flex items-center justify-between p-3 bg-whale-950 rounded border border-whale-800"><span className="text-white font-bold text-sm">Frankfurt</span><span className="text-emerald-400 font-mono font-bold">{latency.frankfurt}ms</span></div></div></div><div><h2 className="text-2xl font-bold text-white mb-6">Select Your Infrastructure</h2><div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"><TierCard title="Shared VPN" price="29" features={["Shared Static IP", "WireGuard Protocol"]} /><TierCard title="Dedicated IP" price="199" features={["Dedicated Static IP", "Zero-Trust Auth"]} /></div></div></div>
+  );
+};
+export default NetworkView;

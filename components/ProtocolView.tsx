@@ -1,4 +1,4 @@
-import React from "react";
-export default function ProtocolView() {
-  return (<div className="text-whale-light"><h1 className="text-2xl font-bold mb-4">Security Protocol</h1><p>Security architecture overview placeholder.</p></div>);
-}
+import React from 'react';
+import { Lock, Server, Link, ShieldCheck, Cpu, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+const ProtocolView: React.FC = () => { return (<div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"><div className="rounded-2xl border border-trenchGold-500/30 bg-whale-900 p-8 text-center"><h1 className="text-4xl font-black text-white tracking-tighter mb-4">THIS IS <span className="text-trenchGold-500">NOT</span> A CASINO</h1><p className="text-xl text-whale-text max-w-2xl mx-auto font-light">The first verifiable, local-node perpetual trading protocol.</p></div><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><div className="bg-whale-800 border border-whale-700 p-6 rounded-xl"><Lock size={24} className="text-trenchGold-500 mb-4" /><h3 className="text-xl font-bold text-white mb-2">ZERO TRUST TUNNELS</h3></div></div><div className="bg-whale-900/50 border border-whale-700 rounded-xl p-8 mt-12"><div className="grid grid-cols-1 md:grid-cols-2 gap-12"><div><h3 className="text-rose-400 font-bold tracking-widest text-sm border-b border-rose-900/50 pb-2">WHAT WE ARE NOT</h3><ul className="space-y-3"><li className="flex items-start gap-3 text-slate-400"><XCircle className="text-rose-500" size={16} /><span>We are <strong>NOT</strong> an exchange.</span></li></ul></div></div></div></div>); };
+export default ProtocolView;
