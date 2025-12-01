@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 
-import WhaleBotView from "./WhaleBotView.tsx";
-import NetworkView from "./NetworkView.tsx";
-import ProtocolView from "./ProtocolView.tsx";
-import HowItWorksView from "./HowItWorksView.tsx";
-import StrategyView from "./StrategyView.tsx";
-import SignalPanel from "./SignalPanel.tsx";
-import SystemMonitor from "./SystemMonitor.tsx";
-import SettingsView from "./SettingsView.tsx";
+import WhaleBotView from "./WhaleBotView";
+import NetworkView from "./NetworkView";
+import ProtocolView from "./ProtocolView";
+import HowItWorksView from "./HowItWorksView";
+import StrategyView from "./StrategyView";
+import SignalPanel from "./SignalPanel";
+import SystemMonitor from "./SystemMonitor";
+import SettingsView from "./SettingsView";
 
 const tabs = [
   { id: "whalebot", label: "WhaleBot" },
