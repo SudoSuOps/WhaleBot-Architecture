@@ -4,10 +4,7 @@ import { TrendingUp, TrendingDown, XCircle, Anchor, Crosshair, AlertTriangle, Al
 import { WHALE_CONFIG } from '../constants';
 import { WhaleLogoIcon } from './BrandAssets';
 
-interface PositionsTableProps {
-  positions: Position[];
-  onClosePosition: (id: string) => void;
-}
+interface PositionsTableProps { positions: Position[]; onClosePosition: (id: string) => void; }
 
 const PositionsTable: React.FC<PositionsTableProps> = ({ positions, onClosePosition }) => {
   const [confirmCloseId, setConfirmCloseId] = useState<string | null>(null);
@@ -15,11 +12,7 @@ const PositionsTable: React.FC<PositionsTableProps> = ({ positions, onClosePosit
   const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
   const [, setTick] = useState(0);
 
-  useEffect(() => {
-    let interval: any;
-    if (hoveredPos) { interval = setInterval(() => setTick(t => t + 1), 1000); }
-    return () => clearInterval(interval);
-  }, [hoveredPos]);
+  useEffect(() => { let interval: any; if (hoveredPos) { interval = setInterval(() => setTick(t => t + 1), 1000); } return () => clearInterval(interval); }, [hoveredPos]);
 
   if (positions.length === 0) {
       return (
@@ -31,29 +24,15 @@ const PositionsTable: React.FC<PositionsTableProps> = ({ positions, onClosePosit
   }
 
   const getTargets = (pos: Position) => {
-    let tpPct = WHALE_CONFIG.exit.takeProfit.percentage;
-    let slPct = WHALE_CONFIG.exit.stopLoss.percentage;
-    const assetsConfig = WHALE_CONFIG.assets as any;
-    if (assetsConfig[pos.asset]) {
-        if (assetsConfig[pos.asset].takeProfitOverride) tpPct = assetsConfig[pos.asset].takeProfitOverride;
-        if (assetsConfig[pos.asset].stopLossOverride) slPct = assetsConfig[pos.asset].stopLossOverride;
-    }
-    let tpPrice, slPrice;
-    if (pos.type === 'LONG') { tpPrice = pos.entryPrice * (1 + tpPct / 100); slPrice = pos.entryPrice * (1 - slPct / 100); } 
-    else { tpPrice = pos.entryPrice * (1 - tpPct / 100); slPrice = pos.entryPrice * (1 + slPct / 100); }
+    let tpPct = WHALE_CONFIG.exit.takeProfit.percentage; let slPct = WHALE_CONFIG.exit.stopLoss.percentage;
+    const assetsConfig = WHALE_CONFIG.assets as any; if (assetsConfig[pos.asset]) { if (assetsConfig[pos.asset].takeProfitOverride) { tpPct = assetsConfig[pos.asset].takeProfitOverride; } if (assetsConfig[pos.asset].stopLossOverride) { slPct = assetsConfig[pos.asset].stopLossOverride; } }
+    let tpPrice, slPrice; if (pos.type === 'LONG') { tpPrice = pos.entryPrice * (1 + tpPct / 100); slPrice = pos.entryPrice * (1 - slPct / 100); } else { tpPrice = pos.entryPrice * (1 - tpPct / 100); slPrice = pos.entryPrice * (1 + slPct / 100); }
     return { tpPrice, slPrice, tpPct, slPct };
   };
 
-  const getProximityStatus = (current: number, target: number) => {
-      const distPercent = Math.abs((current - target) / current) * 100;
-      return { isClose: distPercent < 0.5, dist: distPercent };
-  };
-
+  const getProximityStatus = (current: number, target: number) => { const distPercent = Math.abs((current - target) / current) * 100; return { isClose: distPercent < 0.5, dist: distPercent }; };
   const handleMouseMove = (e: React.MouseEvent) => { setMousePos({ x: e.clientX + 20, y: e.clientY + 20 }); };
-  const formatDuration = (ms: number) => {
-      const seconds = Math.floor(ms / 1000); const minutes = Math.floor(seconds / 60); const hours = Math.floor(minutes / 60);
-      if (hours > 0) return `${hours}h ${minutes % 60}m`; return `${minutes}m ${seconds % 60}s`;
-  };
+  const formatDuration = (ms: number) => { const seconds = Math.floor(ms / 1000); const minutes = Math.floor(seconds / 60); const hours = Math.floor(minutes / 60); if (hours > 0) return `${hours}h ${minutes % 60}m`; return `${minutes}m ${seconds % 60}s`; };
 
   return (
     <>
@@ -62,21 +41,8 @@ const PositionsTable: React.FC<PositionsTableProps> = ({ positions, onClosePosit
         <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-whale-900 text-slate-400"><tr><th className="p-4 font-medium text-xs uppercase tracking-wider">Asset</th><th className="p-4 font-medium text-xs uppercase tracking-wider">Side</th><th className="p-4 font-medium text-xs uppercase tracking-wider">Size</th><th className="p-4 font-medium text-xs uppercase tracking-wider">Entry / Mark</th><th className="p-4 font-medium text-xs uppercase tracking-wider"><div className="flex items-center gap-1"><Crosshair size={14}/> TP Target</div></th><th className="p-4 font-medium text-xs uppercase tracking-wider"><div className="flex items-center gap-1"><AlertTriangle size={14}/> Stop Loss</div></th><th className="p-4 font-medium text-xs uppercase tracking-wider text-right">PnL</th><th className="p-4 font-medium text-xs uppercase tracking-wider text-right">Action</th></tr></thead>
             <tbody className="divide-y divide-whale-700">
                 {positions.map((pos) => {
-                    const { tpPrice, slPrice, tpPct, slPct } = getTargets(pos);
-                    const tpStatus = getProximityStatus(pos.currentPrice, tpPrice);
-                    const slStatus = getProximityStatus(pos.currentPrice, slPrice);
-                    return (
-                    <tr key={pos.id} className="hover:bg-whale-700/30 transition-colors cursor-crosshair group" onMouseEnter={(e) => { setHoveredPos(pos); handleMouseMove(e); }} onMouseMove={handleMouseMove} onMouseLeave={() => setHoveredPos(null)}>
-                        <td className="p-4 font-bold text-white border-l-2 border-transparent hover:border-l-trenchGold-500 transition-all"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-diamond-500 animate-pulse shadow-[0_0_8px_#00f0ff]"></div>{pos.asset}</div></td>
-                        <td className="p-4"><span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${pos.type === 'LONG' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>{pos.type === 'LONG' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}{pos.type}</span></td>
-                        <td className="p-4 font-mono text-slate-300">${pos.size.toLocaleString()}<div className="text-[10px] text-slate-500">{pos.leverage}x</div></td>
-                        <td className="p-4 font-mono"><div className="text-slate-400">${pos.entryPrice.toLocaleString()}</div><div className="text-white font-bold">${pos.currentPrice.toLocaleString()}</div></td>
-                        <td className="p-4 font-mono"><div className={`${tpStatus.isClose ? 'text-emerald-400 animate-pulse font-bold' : 'text-emerald-500/70'}`}>${tpPrice.toLocaleString(undefined, {maximumFractionDigits: 1})}</div><div className="text-[10px] text-slate-500 flex items-center gap-1"><span>{tpPct}%</span>{tpStatus.isClose && <span className="text-emerald-400 font-bold">NEAR</span>}</div></td>
-                        <td className="p-4 font-mono"><div className={`${slStatus.isClose ? 'text-rose-400 animate-pulse font-bold' : 'text-rose-500/70'}`}>${slPrice.toLocaleString(undefined, {maximumFractionDigits: 1})}</div><div className="text-[10px] text-slate-500 flex items-center gap-1"><span>{slPct}%</span>{slStatus.isClose && <span className="text-rose-400 font-bold">RISK</span>}</div></td>
-                        <td className={`p-4 font-mono font-bold text-right ${pos.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}><div className="text-base">{pos.pnl >= 0 ? '+' : ''}{pos.pnl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div><div className="text-xs opacity-80">({pos.pnlPercent.toFixed(2)}%)</div></td>
-                        <td className="p-4 text-right"><button onClick={(e) => { e.stopPropagation(); setConfirmCloseId(pos.id); }} className="p-2 hover:bg-rose-500/20 rounded-lg text-slate-500 hover:text-rose-400 transition-colors group border border-transparent hover:border-rose-500/30" title="Close Position"><XCircle size={18} /></button></td>
-                    </tr>
-                    );
+                    const { tpPrice, slPrice, tpPct, slPct } = getTargets(pos); const tpStatus = getProximityStatus(pos.currentPrice, tpPrice); const slStatus = getProximityStatus(pos.currentPrice, slPrice);
+                    return (<tr key={pos.id} className="hover:bg-whale-700/30 transition-colors cursor-crosshair group" onMouseEnter={(e) => { setHoveredPos(pos); handleMouseMove(e); }} onMouseMove={handleMouseMove} onMouseLeave={() => setHoveredPos(null)}><td className="p-4 font-bold text-white border-l-2 border-transparent hover:border-l-trenchGold-500 transition-all"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-diamond-500 animate-pulse shadow-[0_0_8px_#00f0ff]"></div>{pos.asset}</div></td><td className="p-4"><span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${pos.type === 'LONG' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>{pos.type === 'LONG' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}{pos.type}</span></td><td className="p-4 font-mono text-slate-300">${pos.size.toLocaleString()}<div className="text-[10px] text-slate-500">{pos.leverage}x</div></td><td className="p-4 font-mono"><div className="text-slate-400">${pos.entryPrice.toLocaleString()}</div><div className="text-white font-bold">${pos.currentPrice.toLocaleString()}</div></td><td className="p-4 font-mono"><div className={`${tpStatus.isClose ? 'text-emerald-400 animate-pulse font-bold' : 'text-emerald-500/70'}`}>${tpPrice.toLocaleString(undefined, {maximumFractionDigits: 1})}</div><div className="text-[10px] text-slate-500 flex items-center gap-1"><span>{tpPct}%</span>{tpStatus.isClose && <span className="text-emerald-400 font-bold">NEAR</span>}</div></td><td className="p-4 font-mono"><div className={`${slStatus.isClose ? 'text-rose-400 animate-pulse font-bold' : 'text-rose-500/70'}`}>${slPrice.toLocaleString(undefined, {maximumFractionDigits: 1})}</div><div className="text-[10px] text-slate-500 flex items-center gap-1"><span>{slPct}%</span>{slStatus.isClose && <span className="text-rose-400 font-bold">RISK</span>}</div></td><td className={`p-4 font-mono font-bold text-right ${pos.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}><div className="text-base">{pos.pnl >= 0 ? '+' : ''}{pos.pnl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div><div className="text-xs opacity-80">({pos.pnlPercent.toFixed(2)}%)</div></td><td className="p-4 text-right"><button onClick={(e) => { e.stopPropagation(); setConfirmCloseId(pos.id); }} className="p-2 hover:bg-rose-500/20 rounded-lg text-slate-500 hover:text-rose-400 transition-colors group border border-transparent hover:border-rose-500/30" title="Close Position"><XCircle size={18} /></button></td></tr>);
                 })}
             </tbody></table></div></div>
         {hoveredPos && mousePos && (<div className="fixed z-50 w-72 p-0 bg-whale-900 border border-trenchGold-500/40 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] backdrop-blur-xl pointer-events-none flex flex-col animate-in fade-in zoom-in-95 duration-100 overflow-hidden" style={{ top: mousePos.y, left: mousePos.x }}><div className="px-4 py-3 bg-gradient-to-r from-whale-800 to-whale-900 border-b border-whale-700 flex justify-between items-center"><span className="font-bold text-white tracking-wide">{hoveredPos.asset} Position</span><span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${hoveredPos.type === 'LONG' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}`}>{hoveredPos.type}</span></div><div className="p-4 space-y-3"><div className="flex items-center gap-2 text-slate-400 text-xs pb-2 border-b border-whale-800"><Clock size={12} className="text-trenchGold-500" /><span>Duration: <span className="text-white font-mono font-bold">{formatDuration(Date.now() - hoveredPos.timestamp)}</span></span></div>{(() => { const { tpPrice, slPrice, tpPct, slPct } = getTargets(hoveredPos); return (<div className="grid grid-cols-2 gap-2 mt-1"><div className="bg-emerald-900/10 p-2 rounded border border-emerald-500/20"><p className="text-[10px] text-emerald-500 uppercase mb-1 flex items-center gap-1 font-bold"><Target size={10}/> Take Profit</p><p className="font-mono text-emerald-400 font-bold text-sm">${tpPrice.toLocaleString(undefined, { maximumFractionDigits: 1 })}</p><p className="text-[10px] text-slate-500 font-mono mt-0.5">{tpPct}% Target</p></div><div className="bg-rose-900/10 p-2 rounded border border-rose-500/20"><p className="text-[10px] text-rose-500 uppercase mb-1 flex items-center gap-1 font-bold"><Shield size={10}/> Stop Loss</p><p className="font-mono text-rose-400 font-bold text-sm">${slPrice.toLocaleString(undefined, { maximumFractionDigits: 1 })}</p><p className="text-[10px] text-slate-500 font-mono mt-0.5">{slPct}% Limit</p></div></div>); })()}</div></div>)}

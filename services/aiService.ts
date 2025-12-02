@@ -7,6 +7,7 @@ import { getMiningStats } from './miningService';
 let apiBackoffUntil = 0;
 
 export const generateAnalysis = async (currentPrice: number, asset: string): Promise<TradeSignal> => {
+  // If API Key is present and we aren't in backoff mode, try real AI
   if (process.env.API_KEY && Date.now() > apiBackoffUntil) { 
     try { 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY }); 
@@ -20,6 +21,7 @@ export const generateAnalysis = async (currentPrice: number, asset: string): Pro
       } else { console.error("Gemini API Error (Falling back to local):", e); }
     }
   }
+  // Local Simulation Fallback
   const isBullish = Math.random() > 0.5; const confidence = 60 + Math.floor(Math.random() * 38);
   return { asset, direction: confidence > WHALE_CONFIG.entry.signalThreshold ? (isBullish ? 'LONG' : 'SHORT') : 'NEUTRAL', confidence, reasoning: isBullish ? "Bullish divergence detected on 15m timeframe. Accumulation volume rising." : "Bearish rejection at key resistance level. Momentum slowing down.", timestamp: Date.now(), indicators: { rsi: isBullish ? 35 + Math.random() * 10 : 65 - Math.random() * 10, macd: isBullish ? 'CROSS_UP' : 'CROSS_DOWN', volume: 1.2 + Math.random() } };
 };
@@ -62,6 +64,34 @@ const getAssetFlavor = (asset: string) => {
 const TRENCH_VOCAB = ["jeets", "nuke", "god candle", "send it", "shakeout", "alpha", "liquidated", "max bidding", "capitulation", "up only", "paper hands"];
 
 export const queryWhaleBot = async (query: string, context: SystemStatus, prices: Record<string, number>, selectedAsset: string): Promise<string> => {
+    // If API Key is active, use the LLM to generate the text response
+    if (process.env.API_KEY && Date.now() > apiBackoffUntil) {
+       try {
+          const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+          const prompt = `
+            You are WhaleBot, a trench-native crypto trading AI. 
+            User Query: "${query}"
+            Current Market Context: 
+            - Asset: ${selectedAsset}
+            - Price: $${prices[selectedAsset]}
+            - Quant Score: ${(context.quantMetrics.totalScore * 100).toFixed(0)}% (${context.quantMetrics.bias})
+            - Volatility Index: ${context.volatilityIndex.toFixed(1)}
+            - Whale Activity: ${context.whaleFeed.length > 0 ? context.whaleFeed[0].action : 'Quiet'}
+            
+            Answer the user in a professional yet crypto-native style (use terms like jeets, rekt, god candle, nuke sparingly but effectively). 
+            Be concise. Focus on risk and probability.
+          `;
+          const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+          return response.text || "Analysis stream interrupted.";
+       } catch (e: any) {
+          if (e.toString().includes('429') || e.status === 429) { 
+             console.warn("[WhaleBot] Rate Limit Hit. Switching to Local Inference."); 
+             apiBackoffUntil = Date.now() + 60000; 
+          }
+       }
+    }
+
+    // Local Fallback Logic (Same as before)
     const q = query.toLowerCase();
     let targetAsset = selectedAsset; const knownAssets = Object.keys(prices); for (const asset of knownAssets) { if (q.includes(asset.toLowerCase())) { targetAsset = asset; break; } }
     const currentPrice = prices[targetAsset]; const { quantMetrics, whaleFeed } = context; const scorePct = (quantMetrics.totalScore * 100).toFixed(0); const bias = quantMetrics.bias.replace('_', ' '); const flavor = getAssetFlavor(targetAsset);
