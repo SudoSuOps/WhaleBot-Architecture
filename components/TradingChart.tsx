@@ -1,22 +1,147 @@
+
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { MarketData } from '../types';
 import { WHALE_CONFIG } from '../constants';
-interface TradingChartProps { data: MarketData[]; currentPrice: number; selectedAsset: string; onAssetChange: (asset: string) => void; dataSource: 'KRAKEN' | 'HYPERLIQUID'; onDataSourceChange: (source: 'KRAKEN' | 'HYPERLIQUID') => void; }
+
+interface TradingChartProps {
+  data: MarketData[];
+  currentPrice: number;
+  selectedAsset: string;
+  onAssetChange: (asset: string) => void;
+  dataSource: 'KRAKEN' | 'HYPERLIQUID';
+  onDataSourceChange: (source: 'KRAKEN' | 'HYPERLIQUID') => void;
+}
+
 const TradingChart: React.FC<TradingChartProps> = ({ data, currentPrice, selectedAsset, onAssetChange, dataSource, onDataSourceChange }) => {
+  const majors = WHALE_CONFIG.assets.majors;
+  const trenches = WHALE_CONFIG.assets.trenches;
+
   return (
-    <div className="h-[500px] w-full bg-whale-800 border border-whale-700 rounded-xl p-4 shadow-lg flex flex-col">
-      <div className="flex justify-between items-center mb-4 gap-4">
-        <div className="flex gap-2">
-            <div className="flex items-center gap-2"><span className="text-[10px] font-bold">MAJORS</span>{WHALE_CONFIG.assets.majors.map(a => <button key={a} onClick={() => onAssetChange(a)} className={`px-3 py-1 rounded-md text-xs font-bold ${selectedAsset === a ? 'bg-diamond-500 text-whale-900' : 'text-slate-400'}`}>{a}</button>)}</div>
-            <div className="flex items-center gap-2"><span className="text-[10px] font-bold text-trenchPurple-500">TRENCH</span>{WHALE_CONFIG.assets.trenches.map(a => <button key={a} onClick={() => onAssetChange(a)} className={`px-3 py-1 rounded-md text-xs font-bold ${selectedAsset === a ? 'bg-trenchPurple-500 text-white' : 'text-slate-400'}`}>{a}</button>)}</div>
+    <div className="h-[500px] w-full bg-whale-800 border border-whale-700 rounded-xl p-4 shadow-lg shadow-black/20 flex flex-col">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-4 gap-4">
+        
+        {/* ASSET SELECTORS */}
+        <div className="flex flex-col gap-2 w-full xl:w-auto">
+            {/* Majors */}
+            <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider w-12">Majors</span>
+                <div className="flex bg-whale-900 rounded-lg p-1 border border-whale-700">
+                    {majors.map(asset => (
+                        <button
+                            key={asset}
+                            onClick={() => onAssetChange(asset)}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                                selectedAsset === asset 
+                                ? 'bg-diamond-500 text-whale-900 shadow-[0_0_10px_rgba(100,255,218,0.3)]' 
+                                : 'text-slate-400 hover:text-slate-200'
+                            }`}
+                        >
+                            {asset}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Trenches */}
+            <div className="flex items-center gap-2">
+                <span className="text-[10px] text-trenchPurple-500 font-bold uppercase tracking-wider w-12">Trench</span>
+                <div className="flex bg-whale-900 rounded-lg p-1 border border-whale-700/50">
+                    {trenches.map(asset => (
+                        <button
+                            key={asset}
+                            onClick={() => onAssetChange(asset)}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                                selectedAsset === asset 
+                                ? 'bg-trenchPurple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' 
+                                : 'text-slate-500 hover:text-trenchPurple-400'
+                            }`}
+                        >
+                            {asset}
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
-        <div className="flex items-center gap-4"><span className="text-3xl font-mono text-diamond-500">${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</span><div className="flex bg-whale-900 rounded-lg p-1 border border-whale-700"><button onClick={() => onDataSourceChange('KRAKEN')} className={`px-3 py-1 rounded text-[10px] font-bold ${dataSource === 'KRAKEN' ? 'bg-trenchGold-500 text-whale-900' : 'text-slate-500'}`}>KRAKEN</button><button onClick={() => onDataSourceChange('HYPERLIQUID')} className={`px-3 py-1 rounded text-[10px] font-bold ${dataSource === 'HYPERLIQUID' ? 'bg-trenchPurple-500 text-white' : 'text-slate-500'}`}>HYPERLIQUID</button></div></div>
+        
+        {/* PRICE & TOGGLES */}
+        <div className="flex items-center justify-between w-full xl:w-auto gap-4">
+             <span className="text-3xl font-mono text-diamond-500 animate-in fade-in duration-300 whitespace-nowrap">
+                ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+            </span>
+
+            <div className="flex items-center gap-2">
+            {/* Data Source Toggle */}
+            <div className="flex bg-whale-900 rounded-lg p-1 border border-whale-700">
+                <button 
+                    onClick={() => onDataSourceChange('KRAKEN')}
+                    className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${dataSource === 'KRAKEN' ? 'bg-trenchGold-500 text-whale-900' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                    KRAKEN
+                </button>
+                <button 
+                    onClick={() => onDataSourceChange('HYPERLIQUID')}
+                    className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${dataSource === 'HYPERLIQUID' ? 'bg-trenchPurple-500 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                    HYPERLIQUID
+                </button>
+            </div>
+
+            <div className="flex items-center gap-2 px-2 py-1 bg-whale-900 rounded text-xs text-green-400 font-mono border border-whale-700/50">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                LIVE
+            </div>
+            </div>
+        </div>
       </div>
+      
       <div className="flex-1 w-full min-h-0">
-        <ResponsiveContainer width="100%" height="100%"><AreaChart data={data}><defs><linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7'} stopOpacity={0.3}/><stop offset="95%" stopColor={dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7'} stopOpacity={0}/></linearGradient></defs><XAxis dataKey="time" stroke="#8892b0" fontSize={12} tickLine={false} axisLine={false} /><YAxis domain={['auto', 'auto']} stroke="#8892b0" fontSize={12} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ backgroundColor: '#112240', borderColor: '#233554', color: '#ccd6f6' }} /><Area type="monotone" dataKey="price" stroke={dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7'} fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} /><ReferenceLine y={currentPrice} stroke="#ccd6f6" strokeDasharray="3 3" /></AreaChart></ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data}>
+            <defs>
+                <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7'} stopOpacity={0.3}/>
+                <stop offset="95%" stopColor={dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7'} stopOpacity={0}/>
+                </linearGradient>
+            </defs>
+            <XAxis 
+                dataKey="time" 
+                stroke="#8892b0" 
+                fontSize={12} 
+                tickLine={false}
+                axisLine={false}
+                minTickGap={30}
+            />
+            <YAxis 
+                domain={['auto', 'auto']} 
+                stroke="#8892b0" 
+                fontSize={12} 
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(val) => `$${val.toLocaleString()}`}
+                width={80}
+            />
+            <Tooltip 
+                contentStyle={{ backgroundColor: '#112240', borderColor: '#233554', color: '#ccd6f6' }}
+                itemStyle={{ color: dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7' }}
+                labelStyle={{ color: '#8892b0' }}
+                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Price']}
+            />
+            <Area 
+                type="monotone" 
+                dataKey="price" 
+                stroke={dataSource === 'KRAKEN' ? '#ffd700' : '#a855f7'} 
+                fillOpacity={1} 
+                fill="url(#colorPrice)" 
+                strokeWidth={2}
+                isAnimationActive={false}
+            />
+            <ReferenceLine y={currentPrice} stroke="#ccd6f6" strokeDasharray="3 3" />
+            </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
 };
+
 export default TradingChart;

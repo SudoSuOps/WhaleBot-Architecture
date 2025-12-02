@@ -1,21 +1,283 @@
+
 import React, { useState, useEffect } from 'react';
 import { BotConfig, BotStatus, Position, ClosedTrade } from '../types';
 import { getBotStatus } from '../services/aiService';
 import { Brain, Sliders, Zap, Activity, ShieldAlert, Terminal, Power, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
-interface WhaleBotViewProps { botPositions: Position[]; botHistory: ClosedTrade[]; botVault: { balance: number; initial: number }; }
+
+interface WhaleBotViewProps {
+  botPositions: Position[];
+  botHistory: ClosedTrade[];
+  botVault: { balance: number; initial: number };
+}
+
 const WhaleBotView: React.FC<WhaleBotViewProps> = ({ botPositions, botHistory, botVault }) => {
-  const [config, setConfig] = useState<BotConfig>({ active: true, riskProfile: 'BALANCED', assets: ['BTC', 'ETH'], modules: { volatilityCrush: true, fundingArb: false, trendFollowing: true, orderbookImbalance: true }, maxDrawdown: 5, autoHedge: true });
-  const [status, setStatus] = useState<BotStatus>({ regime: 'CHOP_SIDEWAYS', bias: 'FLAT', lastThinking: [], activeOrders: 0, uptime: 0 });
-  useEffect(() => { const interval = setInterval(() => { const newStatus = getBotStatus(); setStatus(prev => ({ ...newStatus, lastThinking: [...newStatus.lastThinking, ...prev.lastThinking].slice(0, 50) })); }, 2000); return () => clearInterval(interval); }, []);
+  const [config, setConfig] = useState<BotConfig>({
+    active: true,
+    riskProfile: 'BALANCED',
+    assets: ['BTC', 'ETH'],
+    modules: {
+        volatilityCrush: true,
+        fundingArb: false,
+        trendFollowing: true,
+        orderbookImbalance: true
+    },
+    maxDrawdown: 5,
+    autoHedge: true
+  });
+
+  const [status, setStatus] = useState<BotStatus>({
+      regime: 'CHOP_SIDEWAYS',
+      bias: 'FLAT',
+      lastThinking: [],
+      activeOrders: 0,
+      uptime: 0
+  });
+
+  // Poll for bot status (simulating live backend)
+  useEffect(() => {
+    const interval = setInterval(() => {
+        const newStatus = getBotStatus();
+        setStatus(prev => ({
+            ...newStatus,
+            // Keep history in a scrolling log
+            lastThinking: [...newStatus.lastThinking, ...prev.lastThinking].slice(0, 50)
+        }));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleModule = (mod: keyof typeof config.modules) => {
+      setConfig(prev => ({
+          ...prev,
+          modules: { ...prev.modules, [mod]: !prev.modules[mod] }
+      }));
+  };
+
+  const getRegimeColor = (r: string) => {
+      if (r.includes('TREND')) return 'text-emerald-400';
+      if (r.includes('CHOP')) return 'text-trenchGold-500';
+      if (r.includes('VOL') || r.includes('CRISIS')) return 'text-rose-500';
+      return 'text-slate-400';
+  };
+
   return (
-    <div className="space-y-6">
-        <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-6 flex justify-between items-center"><div className="flex items-center gap-3"><Brain className="text-diamond-500" size={32} /><h1 className="text-2xl font-black text-white tracking-wide">WHALEBOT INTELLIGENCE</h1></div><button onClick={() => setConfig(c => ({...c, active: !c.active}))} className={`px-4 py-2 rounded-lg font-bold border ${config.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}`}>{config.active ? 'SYSTEM ARMED' : 'DISARMED'}</button></div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        
+        {/* Header */}
+        <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-6 flex justify-between items-center relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-5">
+                <Brain size={150} />
+            </div>
+            <div>
+                <div className="flex items-center gap-3 mb-1">
+                    <Brain className="text-diamond-500" size={32} />
+                    <h1 className="text-2xl font-black text-white tracking-wide">WHALEBOT <span className="text-slate-500 font-light">INTELLIGENCE</span></h1>
+                </div>
+                <p className="text-slate-400 text-sm">Running on Local 5090 Cluster • Edge Inference Active</p>
+            </div>
+            <div className="flex items-center gap-4 z-10">
+                <div className="text-right">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest">Uptime</p>
+                    <p className="font-mono text-white font-bold">{(status.uptime / 3600).toFixed(1)}h</p>
+                </div>
+                <button 
+                    onClick={() => setConfig(c => ({...c, active: !c.active}))}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold border transition-all ${
+                        config.active 
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
+                        : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'
+                    }`}
+                >
+                    <Power size={18} />
+                    {config.active ? 'SYSTEM ARMED' : 'SYSTEM DISARMED'}
+                </button>
+            </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 space-y-6"><div className="bg-whale-800 border border-whale-700 rounded-xl p-6"><h3 className="text-white font-bold mb-4">MARKET REGIME</h3><div className="text-center py-6 bg-whale-900 rounded-lg"><p className="text-2xl font-black text-emerald-400">{status.regime}</p></div></div><div className="bg-whale-800 border border-whale-700 rounded-xl p-6"><h3 className="text-white font-bold mb-4">DIRECTIONAL BIAS</h3><div className="flex gap-2"><div className={`flex-1 h-12 rounded flex items-center justify-center font-bold ${status.bias === 'LONG' ? 'bg-emerald-600' : 'bg-whale-900'}`}>LONG</div><div className={`flex-1 h-12 rounded flex items-center justify-center font-bold ${status.bias === 'SHORT' ? 'bg-rose-600' : 'bg-whale-900'}`}>SHORT</div></div></div></div>
-            <div className="lg:col-span-1 space-y-6"><div className="bg-whale-800 border border-whale-700 rounded-xl p-6"><h3 className="text-white font-bold mb-4">VAULT STATE</h3><div className="flex justify-between items-end mb-4"><div><p className="text-xs text-slate-500">Balance</p><p className="text-2xl font-mono font-bold text-white">${botVault.balance.toLocaleString()}</p></div></div><div className="pt-4 border-t border-whale-700"><p className="text-xs text-slate-500 mb-2">Active Bot Positions</p><div className="space-y-2 max-h-32 overflow-y-auto">{botPositions.map(pos => (<div key={pos.id} className="flex justify-between bg-whale-900 p-2 rounded"><span className="text-xs font-bold text-white">{pos.asset}</span><span className={`text-xs ${pos.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{pos.pnl.toFixed(2)}</span></div>))}</div></div></div></div>
-            <div className="lg:col-span-1 bg-black rounded-xl border border-whale-700 p-4 font-mono text-xs flex flex-col h-[600px]"><div className="flex-1 overflow-y-auto space-y-1">{status.lastThinking.map((log, i) => (<div key={i} className="break-all"><span className="text-slate-600">[{new Date().toLocaleTimeString()}]</span> <span className="text-trenchGold-400">{'>'}</span> <span className="text-slate-300">{log}</span></div>))}</div></div>
+            
+            {/* COLUMN 1: The Brain Status */}
+            <div className="lg:col-span-1 space-y-6">
+                
+                {/* Market Regime */}
+                <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                    <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Activity size={18} className="text-diamond-500"/> MARKET REGIME</h3>
+                    <div className="text-center py-6 bg-whale-900 rounded-lg border border-whale-700">
+                        <p className={`text-2xl font-black tracking-tight ${getRegimeColor(status.regime)}`}>
+                            {status.regime.replace('_', ' ')}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-2 uppercase tracking-widest">Detected Environment</p>
+                    </div>
+                </div>
+
+                {/* Bias Gauge */}
+                <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                     <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Zap size={18} className="text-trenchGold-500"/> DIRECTIONAL BIAS</h3>
+                     <div className="flex items-center justify-between gap-2">
+                         <div className={`flex-1 h-12 rounded flex items-center justify-center font-bold border ${status.bias === 'LONG' ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-whale-900 border-whale-700 text-slate-600'}`}>LONG</div>
+                         <div className={`flex-1 h-12 rounded flex items-center justify-center font-bold border ${status.bias === 'FLAT' ? 'bg-slate-600 border-slate-400 text-white' : 'bg-whale-900 border-whale-700 text-slate-600'}`}>FLAT</div>
+                         <div className={`flex-1 h-12 rounded flex items-center justify-center font-bold border ${status.bias === 'SHORT' ? 'bg-rose-600 border-rose-400 text-white' : 'bg-whale-900 border-whale-700 text-slate-600'}`}>SHORT</div>
+                     </div>
+                </div>
+
+                {/* Risk Profile */}
+                <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                     <h3 className="text-white font-bold mb-4 flex items-center gap-2"><ShieldAlert size={18} className="text-rose-500"/> RISK PROFILE</h3>
+                     <div className="space-y-4">
+                        <input 
+                            type="range" 
+                            min="1" max="4" step="1" 
+                            value={
+                                config.riskProfile === 'CONSERVATIVE' ? 1 :
+                                config.riskProfile === 'BALANCED' ? 2 :
+                                config.riskProfile === 'AGGRESSIVE' ? 3 : 4
+                            }
+                            onChange={(e) => {
+                                const val = Number(e.target.value);
+                                const profile = val === 1 ? 'CONSERVATIVE' : val === 2 ? 'BALANCED' : val === 3 ? 'AGGRESSIVE' : 'DEGEN';
+                                setConfig({...config, riskProfile: profile});
+                            }}
+                            className="w-full h-2 bg-whale-900 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                        />
+                        <div className="flex justify-between text-[10px] text-slate-500 font-mono uppercase">
+                            <span>Safe</span>
+                            <span>Balanced</span>
+                            <span>Aggro</span>
+                            <span className="text-rose-500 font-bold">DEGEN</span>
+                        </div>
+                        <div className="text-center font-bold text-white bg-whale-900 py-2 rounded border border-whale-700">
+                            {config.riskProfile}
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+            {/* COLUMN 2: Configuration Deck & Vault */}
+            <div className="lg:col-span-1 space-y-6">
+                
+                {/* LIVE PERFORMANCE CARD */}
+                <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                     <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Wallet size={18} className="text-emerald-400"/> VAULT STATE</h3>
+                     <div className="flex justify-between items-end mb-4">
+                         <div>
+                             <p className="text-xs text-slate-500 uppercase">Balance</p>
+                             <p className="text-2xl font-mono font-bold text-white">${botVault.balance.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                         </div>
+                         <div className={`text-sm font-bold ${botVault.balance >= botVault.initial ? 'text-emerald-400' : 'text-rose-400'}`}>
+                             {botVault.balance >= botVault.initial ? '+' : ''}{((botVault.balance - botVault.initial) / botVault.initial * 100).toFixed(2)}%
+                         </div>
+                     </div>
+                     
+                     <div className="pt-4 border-t border-whale-700">
+                         <p className="text-xs text-slate-500 uppercase mb-2">Active Bot Positions ({botPositions.length})</p>
+                         <div className="space-y-2 max-h-32 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-whale-700">
+                             {botPositions.length === 0 ? (
+                                 <p className="text-xs text-slate-600 italic">No active positions. Scanning...</p>
+                             ) : (
+                                 botPositions.map(pos => (
+                                     <div key={pos.id} className="flex justify-between items-center bg-whale-900 p-2 rounded border border-whale-700">
+                                         <div className="flex items-center gap-2">
+                                             {pos.type === 'LONG' ? <TrendingUp size={12} className="text-emerald-500"/> : <TrendingDown size={12} className="text-rose-500"/>}
+                                             <span className="text-xs font-bold text-white">{pos.asset}</span>
+                                         </div>
+                                         <span className={`text-xs font-mono ${pos.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                             {pos.pnl >= 0 ? '+' : ''}{pos.pnl.toFixed(2)}
+                                         </span>
+                                     </div>
+                                 ))
+                             )}
+                         </div>
+                     </div>
+                </div>
+
+                {/* LOGIC MODULES */}
+                <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                    <h3 className="text-white font-bold mb-6 flex items-center gap-2"><Sliders size={18} className="text-diamond-500"/> LOGIC MODULES</h3>
+                    
+                    <div className="space-y-4">
+                        {/* Module Items */}
+                        <div className="flex items-center justify-between p-4 bg-whale-900 rounded-lg border border-whale-700">
+                            <div>
+                                <p className="font-bold text-slate-200">Volatility Crush</p>
+                                <p className="text-xs text-slate-500">Shorts volatility spikes &gt; 2 sigma</p>
+                            </div>
+                            <button onClick={() => toggleModule('volatilityCrush')} className={`w-12 h-6 rounded-full transition-colors relative ${config.modules.volatilityCrush ? 'bg-emerald-500' : 'bg-whale-700'}`}>
+                                <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${config.modules.volatilityCrush ? 'translate-x-6' : ''}`}></div>
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-whale-900 rounded-lg border border-whale-700">
+                            <div>
+                                <p className="font-bold text-slate-200">Funding Arbitrage</p>
+                                <p className="text-xs text-slate-500">Scalps funding rate deviations</p>
+                            </div>
+                            <button onClick={() => toggleModule('fundingArb')} className={`w-12 h-6 rounded-full transition-colors relative ${config.modules.fundingArb ? 'bg-emerald-500' : 'bg-whale-700'}`}>
+                                <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${config.modules.fundingArb ? 'translate-x-6' : ''}`}></div>
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-whale-900 rounded-lg border border-whale-700">
+                            <div>
+                                <p className="font-bold text-slate-200">Trend Following</p>
+                                <p className="text-xs text-slate-500">Momentum entries on EMA crosses</p>
+                            </div>
+                            <button onClick={() => toggleModule('trendFollowing')} className={`w-12 h-6 rounded-full transition-colors relative ${config.modules.trendFollowing ? 'bg-emerald-500' : 'bg-whale-700'}`}>
+                                <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${config.modules.trendFollowing ? 'translate-x-6' : ''}`}></div>
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-whale-900 rounded-lg border border-whale-700">
+                            <div>
+                                <p className="font-bold text-slate-200">Orderbook Imbalance</p>
+                                <p className="text-xs text-slate-500">Front-runs iceberg orders</p>
+                            </div>
+                            <button onClick={() => toggleModule('orderbookImbalance')} className={`w-12 h-6 rounded-full transition-colors relative ${config.modules.orderbookImbalance ? 'bg-emerald-500' : 'bg-whale-700'}`}>
+                                <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${config.modules.orderbookImbalance ? 'translate-x-6' : ''}`}></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-whale-700">
+                        <p className="text-xs text-slate-400 uppercase tracking-widest mb-3">Asset Focus</p>
+                        <div className="flex flex-wrap gap-2">
+                            {['BTC', 'ETH', 'SOL', 'ALTS'].map(asset => (
+                                <span key={asset} className="px-3 py-1 bg-whale-900 border border-whale-700 rounded text-xs font-mono text-slate-300">
+                                    {asset}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* COLUMN 3: The Logs */}
+            <div className="lg:col-span-1 bg-black rounded-xl border border-whale-700 p-4 font-mono text-xs flex flex-col h-[600px] shadow-inner">
+                 <div className="flex items-center gap-2 mb-4 text-slate-500 border-b border-whale-800 pb-2">
+                    <Terminal size={14} />
+                    <span>whale-cli output --stream</span>
+                 </div>
+                 <div className="flex-1 overflow-y-auto space-y-1 scrollbar-hide">
+                     {status.lastThinking.map((log, i) => (
+                         <div key={i} className="break-all">
+                             <span className="text-slate-600">[{new Date().toLocaleTimeString()}]</span>{' '}
+                             <span className="text-trenchGold-400">{'>'}</span>{' '}
+                             <span className="text-slate-300">{log}</span>
+                         </div>
+                     ))}
+                     {botHistory.length > 0 && botHistory.slice(0, 3).map((trade, i) => (
+                          <div key={`trade-${i}`} className="break-all border-l-2 border-emerald-500 pl-2 my-1">
+                             <span className="text-emerald-500">[{new Date(trade.closeTimestamp).toLocaleTimeString()}]</span>{' '}
+                             <span className="text-emerald-400">CLOSED {trade.type} {trade.asset}</span>{' '}
+                             <span className={trade.pnl >= 0 ? "text-emerald-300" : "text-rose-300"}>${trade.pnl.toFixed(2)}</span>
+                         </div>
+                     ))}
+                     <div className="animate-pulse text-trenchGold-500">_</div>
+                 </div>
+            </div>
+
         </div>
     </div>
   );
 };
+
 export default WhaleBotView;

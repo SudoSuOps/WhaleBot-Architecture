@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,10 +13,31 @@
         theme: {
           extend: {
             colors: {
-              whale: { 950: '#02010a', 900: '#0a051e', 800: '#150a33', 700: '#2a1659', text: '#b8b8d0', light: '#e0e0ff' },
-              trenchGold: { 400: '#ffe55c', 500: '#ffd700', 600: '#b39200', glow: '#ffd70040' },
-              trenchPurple: { 400: '#a855f7', 500: '#7e22ce', 600: '#581c87', glow: '#7e22ce40' },
-              diamond: { 500: '#00f0ff', 600: '#00bcd4' }
+              // The Trench Palette
+              whale: {
+                950: '#02010a', // Deepest Void
+                900: '#0a051e', // Dark Purple Background
+                800: '#150a33', // Card Background
+                700: '#2a1659', // Borders
+                text: '#b8b8d0',
+                light: '#e0e0ff'
+              },
+              trenchGold: {
+                400: '#ffe55c',
+                500: '#ffd700', // Primary Gold
+                600: '#b39200',
+                glow: '#ffd70040'
+              },
+              trenchPurple: {
+                400: '#a855f7',
+                500: '#7e22ce',
+                600: '#581c87',
+                glow: '#7e22ce40'
+              },
+              diamond: {
+                500: '#00f0ff', // Electric Blue
+                600: '#00bcd4',
+              }
             },
             fontFamily: {
               mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
@@ -30,11 +52,32 @@
       }
     </script>
     <style>
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: #02010a; }
-      ::-webkit-scrollbar-thumb { background: #2a1659; border-radius: 3px; border: 1px solid #0a051e; }
-      ::-webkit-scrollbar-thumb:hover { background: #ffd700; }
-      body { background-color: #02010a; color: #b8b8d0; }
+      /* Custom scrollbar for trench vibe */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #02010a; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #2a1659; 
+        border-radius: 3px;
+        border: 1px solid #0a051e;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #ffd700; 
+      }
+      body {
+        background-color: #02010a;
+        color: #b8b8d0;
+      }
+      .neon-gold {
+        box-shadow: 0 0 10px #ffd70040, 0 0 20px #ffd70020;
+      }
+      .neon-blue {
+        box-shadow: 0 0 10px #00f0ff40, 0 0 20px #00f0ff20;
+      }
     </style>
   <script type="importmap">
 {
@@ -50,6 +93,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>

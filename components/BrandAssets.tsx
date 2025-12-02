@@ -1,0 +1,54 @@
+
+import React from 'react';
+
+// THE CYBERPUNK DIAMOND WHALE
+// Represents: Massive Scale, AI Intelligence (Circuits), and Unbreakable Trust (Diamond)
+export const WhaleLogoIcon = ({ className = "w-10 h-10" }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${className} drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]`}>
+    <defs>
+      <linearGradient id="glowGradient" x1="0" y1="0" x2="100" y2="100">
+        <stop offset="0%" stopColor="#00f0ff" />
+        <stop offset="100%" stopColor="#7e22ce" />
+      </linearGradient>
+    </defs>
+    
+    {/* Glow effect backing */}
+    <path d="M15 35 C 15 35, 30 20, 50 20 C 70 20, 90 40, 95 60 C 95 60, 80 85, 50 85 C 30 85, 10 70, 5 50" fill="url(#glowGradient)" opacity="0.2" />
+    
+    {/* 1. HEAT SINK BELLY (The Metal) */}
+    <path d="M25 65 L 30 80 M 35 68 L 40 82 M 45 70 L 50 83 M 55 70 L 60 82 M 65 68 L 70 80" stroke="#7e22ce" strokeWidth="2" strokeLinecap="round" />
+    
+    {/* 2. THE WHALE BODY SILHOUETTE */}
+    <path d="M10 45 C 10 30, 30 25, 45 25 C 70 25, 90 45, 92 60 C 94 75, 70 82, 50 82 C 30 82, 15 70, 10 45 Z" fill="#02010a" stroke="#00f0ff" strokeWidth="1.5" />
+    
+    {/* 3. DIAMOND DORSAL FIN (Trust) */}
+    <path d="M48 25 L 58 5 L 68 25" fill="#0a051e" stroke="#ffd700" strokeWidth="2" strokeLinejoin="round" />
+    <path d="M58 5 L 58 25" stroke="#ffd700" strokeWidth="1" opacity="0.5" />
+    
+    {/* 4. GPU CIRCUIT TRACES (Intelligence) */}
+    <path d="M20 50 L 30 50 L 35 40 L 55 40 L 60 48" stroke="#00f0ff" strokeWidth="1" strokeLinecap="round" className="animate-pulse" />
+    <circle cx="20" cy="50" r="1.5" fill="#00f0ff" />
+    <circle cx="60" cy="48" r="1.5" fill="#00f0ff" />
+    
+    <path d="M40 30 L 45 35 L 65 35" stroke="#a855f7" strokeWidth="1" strokeLinecap="round" opacity="0.8" />
+    <circle cx="65" cy="35" r="1.5" fill="#a855f7" />
+
+    {/* 5. THE EYE (Vision) */}
+    <circle cx="82" cy="55" r="2" fill="#ffd700" className="animate-pulse" />
+  </svg>
+);
+
+export const WhaleText = () => (
+  <h1 className="text-xl font-black text-white tracking-widest font-mono">
+    WHALE<span className="text-diamond-500">PERP</span>
+  </h1>
+);
+
+export const WhaleLogoFull = () => (
+  <div className="flex items-center gap-3">
+    <WhaleLogoIcon className="w-10 h-10" />
+    <div>
+      <WhaleText />
+    </div>
+  </div>
+);
