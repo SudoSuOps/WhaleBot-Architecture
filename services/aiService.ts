@@ -5,19 +5,19 @@ import { getMiningStats } from './miningService';
 
 let apiBackoffUntil = 0;
 
-// Helper to call local Cloudflare Worker AI if available
-const callWorkerAI = async (prompt: string, systemContext: string) => {
+// --- CLOUDFLARE WORKER AI INTEGRATION ---
+const callWorkerAI = async (prompt: string, systemContext: string, model: 'MISTRAL' | 'LLAMA' | 'QWEN' = 'MISTRAL') => {
     try {
         const res = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, system: systemContext })
+            body: JSON.stringify({ prompt, system: systemContext, model })
         });
         if (!res.ok) throw new Error('Worker AI Error');
         const data = await res.json();
         return data.response;
     } catch (e) {
-        console.warn("Worker AI Failed (using simulation fallback):", e);
+        console.error("Worker AI Failed:", e);
         return null;
     }
 };
@@ -32,24 +32,11 @@ export const generateAnalysis = async (currentPrice: number, asset: string): Pro
       const text = response.text; if (text) return JSON.parse(text) as TradeSignal; 
     } catch (e: any) { 
       if (e.toString().includes('429') || e.status === 429) { 
-        console.warn("[WhaleBot] Rate Limit Hit. Switching strategies."); apiBackoffUntil = Date.now() + 60000; 
+        console.warn("[WhaleBot] Rate Limit Hit. Switching to Local Inference."); apiBackoffUntil = Date.now() + 60000; 
       }
     }
   }
   
-  // Priority 2: Sovereign Worker AI (Cloudflare)
-  const systemPrompt = "You are a high-frequency trading bot. Output JSON only. Format: { asset, direction, confidence, reasoning, timestamp, indicators: { rsi, macd, volume } }";
-  const userPrompt = `Analyze ${asset} at $${currentPrice}. Return JSON matching TradeSignal interface.`;
-  const workerResponse = await callWorkerAI(userPrompt, systemPrompt);
-  
-  if (workerResponse) {
-      try {
-          const jsonStr = workerResponse.replace(/```json/g, '').replace(/```/g, '');
-          return JSON.parse(jsonStr) as TradeSignal;
-      } catch (e) { console.warn("Failed to parse Worker AI JSON"); }
-  }
-
-  // Priority 3: Local Simulation (Offline)
   const isBullish = Math.random() > 0.5; const confidence = 60 + Math.floor(Math.random() * 38);
   return { asset, direction: confidence > WHALE_CONFIG.entry.signalThreshold ? (isBullish ? 'LONG' : 'SHORT') : 'NEUTRAL', confidence, reasoning: isBullish ? "Bullish divergence detected on 15m timeframe. Accumulation volume rising." : "Bearish rejection at key resistance level. Momentum slowing down.", timestamp: Date.now(), indicators: { rsi: isBullish ? 35 + Math.random() * 10 : 65 - Math.random() * 10, macd: isBullish ? 'CROSS_UP' : 'CROSS_DOWN', volume: 1.2 + Math.random() } };
 };
@@ -91,7 +78,7 @@ const getAssetFlavor = (asset: string) => {
 
 const TRENCH_VOCAB = ["jeets", "nuke", "god candle", "send it", "shakeout", "alpha", "liquidated", "max bidding", "capitulation", "up only", "paper hands"];
 
-export const queryWhaleBot = async (query: string, context: SystemStatus, prices: Record<string, number>, selectedAsset: string): Promise<string> => {
+export const queryWhaleBot = async (query: string, context: SystemStatus, prices: Record<string, number>, selectedAsset: string, activeModel: 'MISTRAL'|'LLAMA'|'QWEN' = 'MISTRAL'): Promise<string> => {
     const q = query.toLowerCase();
     let targetAsset = selectedAsset; const knownAssets = Object.keys(prices); for (const asset of knownAssets) { if (q.includes(asset.toLowerCase())) { targetAsset = asset; break; } }
     const currentPrice = prices[targetAsset]; const { quantMetrics, whaleFeed } = context; const scorePct = (quantMetrics.totalScore * 100).toFixed(0); const bias = quantMetrics.bias.replace('_', ' '); const flavor = getAssetFlavor(targetAsset);
@@ -110,8 +97,8 @@ export const queryWhaleBot = async (query: string, context: SystemStatus, prices
        }
     }
 
-    // 2. Try Worker AI (Sovereign)
-    const systemPrompt = `You are WhaleBot, a trench-native crypto trading AI running on Cloudflare Edge GPUs. 
+    // 2. Try Worker AI (Sovereign Multi-Model)
+    const systemPrompt = `You are WhaleBot, a trench-native crypto trading AI running on Cloudflare Edge GPUs (${activeModel}). 
     Current Market Context: 
     - Asset: ${targetAsset}
     - Price: $${currentPrice}
@@ -119,7 +106,7 @@ export const queryWhaleBot = async (query: string, context: SystemStatus, prices
     
     Answer the user in a professional yet crypto-native style. Be concise.`;
     
-    const workerResponse = await callWorkerAI(query, systemPrompt);
+    const workerResponse = await callWorkerAI(query, systemPrompt, activeModel);
     if (workerResponse) return workerResponse;
 
     // 3. Fallback (Offline)

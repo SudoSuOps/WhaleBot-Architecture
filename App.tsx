@@ -24,7 +24,10 @@ import { sendDiscordAlert } from './services/notificationService';
 import { WHALE_CONFIG } from './constants';
 
 const App: React.FC = () => {
-  const loadState = <T,>(key: string, def: T): T => { const saved = localStorage.getItem(key); return saved ? JSON.parse(saved) : def; };
+  const loadState = <T,>(key: string, def: T): T => { 
+      try { const saved = localStorage.getItem(key); return saved ? JSON.parse(saved) : def; } catch (e) { return def; }
+  };
+  
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dataSource, setDataSource] = useState<'KRAKEN' | 'HYPERLIQUID'>('KRAKEN');
   const [timeframe, setTimeframe] = useState<Timeframe>('15m');
@@ -33,6 +36,7 @@ const App: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>('BTC');
   const [chartDataMap, setChartDataMap] = useState<Record<string, MarketData[]>>({ BTC: [], ETH: [], SOL: [], XRP: [], TAO: [], ASTR: [], DOGE: [], BNB: [] });
   const [systemStats, setSystemStats] = useState<SystemStatus>({ gpuNodes: [], cpuLoad: 0, memoryUsage: 0, volatilityIndex: 50, playbookStream: [], quantMetrics: { totalScore: 0.5, bias: 'NEUTRAL', signals: [] }, whaleFeed: [], mining: { hashrate: 0, temp: 0, blockHeight: 0, bestShareDifficulty: 0, power: 0, status: 'CONNECTING', probability: 0 } });
+  
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => loadState('whale_identity', null));
   const [showCheckout, setShowCheckout] = useState(false);
 
