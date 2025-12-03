@@ -1,10 +1,121 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { WHALE_CONFIG } from '../constants';
-import { Shield, Target, Clock, Zap, Layers } from 'lucide-react';
+import { Shield, Target, Clock, Zap, Layers, Sliders, Save, PlayCircle, RotateCcw } from 'lucide-react';
 
 const StrategyView: React.FC = () => {
+  const [config, setConfig] = useState(WHALE_CONFIG);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="md:col-span-2 bg-gradient-to-r from-whale-800 to-whale-900 p-6 rounded-xl border border-whale-700 flex justify-between items-center"><div><h2 className="text-2xl font-bold text-white mb-2">{WHALE_CONFIG.codename}</h2><p className="text-whale-400 font-mono text-sm">v{WHALE_CONFIG.version}</p></div><div className="text-right"><div className="inline-block px-3 py-1 bg-diamond-500/10 border border-diamond-500 rounded-full"><span className="text-diamond-500 text-xs font-bold uppercase tracking-wider">Active Configuration</span></div></div></div></div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+      
+      {/* Header Control Deck */}
+      <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-6 flex justify-between items-center">
+        <div>
+             <div className="flex items-center gap-3 mb-1">
+                <Sliders className="text-diamond-500" />
+                <h2 className="text-2xl font-bold text-white">STRATEGY LAB</h2>
+             </div>
+             <p className="text-slate-400 text-sm">Configure the Diamond Fins v3 logic engine. Changes apply to the next tick.</p>
+        </div>
+        <div className="flex gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 bg-whale-900 border border-whale-700 rounded-lg text-slate-400 hover:text-white transition-colors">
+                <RotateCcw size={16} /> Reset Defaults
+            </button>
+            <button className="flex items-center gap-2 px-6 py-2 bg-trenchGold-500 hover:bg-trenchGold-400 text-whale-900 font-bold rounded-lg shadow-[0_0_15px_rgba(255,215,0,0.3)] transition-all">
+                <Save size={18} /> SAVE CONFIG
+            </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* COLUMN 1: ENTRY LOGIC */}
+          <div className="lg:col-span-1 space-y-6">
+             <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Zap className="text-yellow-400" size={18}/> ENTRY TRIGGERS</h3>
+                <div className="space-y-4">
+                    <div>
+                        <div className="flex justify-between text-sm text-slate-400 mb-1"><span>Signal Confidence Threshold</span><span className="text-white">{config.entry.signalThreshold}%</span></div>
+                        <input type="range" className="w-full h-2 bg-whale-900 rounded-lg appearance-none accent-yellow-400" min="50" max="95" defaultValue={config.entry.signalThreshold} />
+                    </div>
+                    <div className="p-3 bg-whale-900 rounded border border-whale-700">
+                        <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-emerald-400">LONG SETUP</span></div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="text-slate-400">RSI &lt; {config.entry.long.indicators.rsiOversold}</div>
+                            <div className="text-slate-400">Vol &gt; {config.entry.long.indicators.volumeSpike}x</div>
+                        </div>
+                    </div>
+                     <div className="p-3 bg-whale-900 rounded border border-whale-700">
+                        <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-rose-400">SHORT SETUP</span></div>
+                         <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="text-slate-400">RSI &gt; {config.entry.short.indicators.rsiOverbought}</div>
+                            <div className="text-slate-400">Vol &gt; {config.entry.short.indicators.volumeSpike}x</div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+          </div>
+
+          {/* COLUMN 2: DIAMOND FINS EXIT */}
+          <div className="lg:col-span-1 space-y-6">
+              <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Target className="text-emerald-400" size={18}/> EXIT MECHANICS</h3>
+                <div className="space-y-6">
+                    <div>
+                        <div className="flex justify-between text-sm text-slate-400 mb-1"><span>Take Profit (Hard)</span><span className="text-emerald-400 font-mono">{config.exit.takeProfit.percentage}%</span></div>
+                        <input type="range" className="w-full h-2 bg-whale-900 rounded-lg appearance-none accent-emerald-500" min="1" max="20" step="0.5" defaultValue={config.exit.takeProfit.percentage} />
+                    </div>
+                    <div>
+                        <div className="flex justify-between text-sm text-slate-400 mb-1"><span>Stop Loss (Hard)</span><span className="text-rose-400 font-mono">{config.exit.stopLoss.percentage}%</span></div>
+                        <input type="range" className="w-full h-2 bg-whale-900 rounded-lg appearance-none accent-rose-500" min="1" max="15" step="0.5" defaultValue={config.exit.stopLoss.percentage} />
+                    </div>
+                    <div className="p-4 bg-whale-900/50 rounded border border-dashed border-whale-600">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-slate-300 font-bold">Trailing Stop</span>
+                            <div className="w-8 h-4 bg-emerald-500 rounded-full relative"><div className="absolute right-1 top-1 w-2 h-2 bg-white rounded-full"></div></div>
+                        </div>
+                        <p className="text-[10px] text-slate-500">Activates when profit &gt; {config.exit.takeProfit.trailingActivation}%. Trails price by {config.exit.takeProfit.trailingDistance}%.</p>
+                    </div>
+                </div>
+             </div>
+          </div>
+
+          {/* COLUMN 3: RISK GUARDRAILS */}
+          <div className="lg:col-span-1 space-y-6">
+              <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Shield className="text-blue-400" size={18}/> RISK GUARDRAILS</h3>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center p-3 bg-whale-900 rounded border border-whale-700">
+                        <span className="text-sm text-slate-400">Max Leverage</span>
+                        <span className="text-white font-mono font-bold">{config.sizing.leverage}x</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-whale-900 rounded border border-whale-700">
+                        <span className="text-sm text-slate-400">Max Daily Loss</span>
+                        <span className="text-rose-500 font-mono font-bold">${config.risk.maxDailyLoss}</span>
+                    </div>
+                     <div className="flex justify-between items-center p-3 bg-whale-900 rounded border border-whale-700">
+                        <span className="text-sm text-slate-400">Max Exposure</span>
+                        <span className="text-white font-mono font-bold">${config.sizing.maxExposure.toLocaleString()}</span>
+                    </div>
+                </div>
+             </div>
+
+             <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                 <h3 className="text-white font-bold mb-2 flex items-center gap-2"><Layers className="text-purple-400" size={18}/> ASSET OVERRIDES</h3>
+                 <p className="text-xs text-slate-500 mb-4">Specific rules for high-volatility assets.</p>
+                 <div className="space-y-2">
+                     {['SOL', 'ASTR', 'DOGE'].map(asset => (
+                         <div key={asset} className="flex justify-between items-center text-xs bg-whale-900 p-2 rounded">
+                             <span className="font-bold text-trenchPurple-400">{asset}</span>
+                             <span className="text-slate-400">TP: 5.0% | SL: 8.0%</span>
+                         </div>
+                     ))}
+                 </div>
+             </div>
+          </div>
+
+      </div>
+    </div>
   );
 };
 export default StrategyView;
