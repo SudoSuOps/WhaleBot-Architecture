@@ -8,11 +8,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body = await request.json() as { prompt: string; system: string };
     
-    // Using Mistral 7B (Fast, Uncensored-ish, High Quality)
-    // Model ID: @cf/mistral/mistral-7b-instruct-v0.1
+    // Using Mistral 7B Instruct
     const response = await env.AI.run('@cf/mistral/mistral-7b-instruct-v0.1', {
       messages: [
-        { role: 'system', content: body.system || "You are WhaleBot, a crypto trading AI." },
+        { role: 'system', content: body.system || "You are WhaleBot." },
         { role: 'user', content: body.prompt }
       ]
     });

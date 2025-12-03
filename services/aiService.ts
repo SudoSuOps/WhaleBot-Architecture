@@ -1,10 +1,14 @@
+import { GoogleGenAI } from "@google/genai";
 import { TradeSignal, BotStatus, MarketRegime, SystemStatus, GpuNode, PlaybookEntry, QuantMetrics, QuantSignal, WhaleTransaction, MiningStats } from '../types';
 import { WHALE_CONFIG } from '../constants';
 import { getMiningStats } from './miningService';
 
+let apiBackoffUntil = 0;
+
 // --- CLOUDFLARE WORKER AI INTEGRATION ---
 const callWorkerAI = async (prompt: string, systemContext: string) => {
     try {
+        // Calls the local Pages Function
         const res = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -14,7 +18,7 @@ const callWorkerAI = async (prompt: string, systemContext: string) => {
         const data = await res.json();
         return data.response;
     } catch (e) {
-        console.error("Worker AI Failed:", e);
+        console.error("Worker AI Failed (Check Cloudflare Bindings):", e);
         return null;
     }
 };
@@ -22,14 +26,13 @@ const callWorkerAI = async (prompt: string, systemContext: string) => {
 export const generateAnalysis = async (currentPrice: number, asset: string): Promise<TradeSignal> => {
   // Use Worker AI for signal analysis
   const systemPrompt = "You are a high-frequency trading bot. Output JSON only.";
-  const userPrompt = \`Analyze \${asset} at \$\${currentPrice}. Strategy: Diamond Fins v3. Return valid JSON matching TradeSignal interface.\`;
+  const userPrompt = `Analyze ${asset} at ${currentPrice}. Strategy: Diamond Fins v3. Return valid JSON matching TradeSignal interface.`;
   
   const aiResponse = await callWorkerAI(userPrompt, systemPrompt);
   
   if (aiResponse) {
       try {
-          // Attempt to parse JSON from AI response (sanitize code blocks if needed)
-          const jsonStr = aiResponse.replace(/\\\`\\\`\\\`json/g, '').replace(/\\\`\\\`\\\`/g, '');
+          const jsonStr = aiResponse.replace(/```json/g, '').replace(/```/g, '');
           return JSON.parse(jsonStr) as TradeSignal;
       } catch (e) { console.warn("Failed to parse AI JSON, falling back to simulation"); }
   }
@@ -52,20 +55,20 @@ export const queryWhaleBot = async (query: string, context: SystemStatus, prices
     const bias = context.quantMetrics.bias.replace('_', ' ');
 
     // Use Sovereign Worker AI
-    const systemPrompt = \`You are WhaleBot, a trench-native crypto trading AI running on Cloudflare Edge GPUs. 
+    const systemPrompt = `You are WhaleBot, a trench-native crypto trading AI running on Cloudflare Edge GPUs. 
     Current Market Context: 
-    - Asset: \${targetAsset}
-    - Price: \$\${currentPrice}
-    - Quant Score: \${scorePct}% (\${bias})
-    - Volatility Index: \${context.volatilityIndex.toFixed(1)}
+    - Asset: ${targetAsset}
+    - Price: ${currentPrice}
+    - Quant Score: ${scorePct}% (${bias})
+    - Volatility Index: ${context.volatilityIndex.toFixed(1)}
     
-    Answer the user in a professional yet crypto-native style (use terms like jeets, rekt, god candle, nuke sparingly but effectively). Be concise.\`;
+    Answer the user in a professional yet crypto-native style (use terms like jeets, rekt, god candle, nuke sparingly but effectively). Be concise.`;
 
     const aiResponse = await callWorkerAI(query, systemPrompt);
     if (aiResponse) return aiResponse;
 
     // Fallback Logic
-    return \`[OFFLINE MODE] Analyzing **\${targetAsset}** (\$\${currentPrice.toFixed(4)})... Quant score of \${scorePct}% indicates a \${bias.toLowerCase()} edge. Prepare for volatility.\`;
+    return `[OFFLINE MODE] Analyzing **${targetAsset}** ($${currentPrice.toFixed(4)})... Quant score of ${scorePct}% indicates a ${bias.toLowerCase()} edge. Prepare for volatility.`;
 };
 
 // ... (Rest of the simulation functions: getBotStatus, getSystemTelemetry, etc. remain unchanged) ...
@@ -99,3 +102,9 @@ export const getSystemTelemetry = (): SystemStatus => {
     const insights: PlaybookEntry[] = []; if (Math.random() > 0.7) { insights.push({ id: Date.now().toString(), timestamp: Date.now(), category: 'PATTERN', insight: "Quant Engine detected high toxicity on Ask side. Skewing Probability Short.", confidence: 85 }); }
     return { gpuNodes: nodes, cpuLoad: 20 + Math.random() * 30, memoryUsage: 128 + Math.random() * 20, volatilityIndex: Math.random() * 100, playbookStream: insights, quantMetrics: generateQuantMetrics(), whaleFeed: generateWhaleFeed(), mining: getMiningStats() };
 };
+
+const getAssetFlavor = (asset: string) => {
+    switch(asset) { case 'BTC': return "validating against 200-week MA microstructure"; case 'ETH': return "monitoring gas/fees for on-chain activity spikes"; case 'SOL': return "analyzing validator slot times and congestion metrics"; case 'XRP': return "scanning ledger nodes for large wallet movement"; case 'DOGE': return "tracking mempool sentiment velocity"; default: return "analyzing depth and volume profile"; }
+}
+
+const TRENCH_VOCAB = ["jeets", "nuke", "god candle", "send it", "shakeout", "alpha", "liquidated", "max bidding", "capitulation", "up only", "paper hands"];
