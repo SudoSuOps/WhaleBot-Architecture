@@ -7,7 +7,6 @@ interface TradingChartProps { data: MarketData[]; currentPrice: number; selected
 
 const TradingChart: React.FC<TradingChartProps> = ({ data, currentPrice, selectedAsset, onAssetChange, dataSource, onDataSourceChange, timeframe, onTimeframeChange }) => {
   const majors = WHALE_CONFIG.assets.majors; const trenches = WHALE_CONFIG.assets.trenches;
-  // Simulate timeframe data reduction
   const displayData = timeframe === '15m' ? data : timeframe === '1h' ? data.filter((_, i) => i % 4 === 0) : data.filter((_, i) => i % 10 === 0);
 
   return (

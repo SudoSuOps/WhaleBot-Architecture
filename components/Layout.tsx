@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LayoutDashboard, Activity, Settings, Cpu, Globe, Shield, BookOpen, Brain, BrainCircuit, Server, Wallet, Share2, PlusCircle, MessageSquare, Megaphone } from 'lucide-react';
 import { WhaleLogoFull } from './BrandAssets';
 import IdentityMint from './IdentityMint'; 
@@ -10,8 +10,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, vaul
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'whalebot', label: 'WhaleBot / Copilot', icon: Brain },
     { id: 'warroom', label: 'War Room', icon: MessageSquare }, 
-    { id: 'network', label: 'Network / VPN', icon: Globe }, 
     { id: 'marketing', label: 'Share Alpha', icon: Megaphone },
+    { id: 'network', label: 'Network / VPN', icon: Globe }, 
     { id: 'protocol', label: 'The Protocol', icon: Shield }, 
     { id: 'how-it-works', label: 'How It Works', icon: BookOpen }, 
     { id: 'strategy', label: 'Strategy Config', icon: Activity }, 

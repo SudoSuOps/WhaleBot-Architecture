@@ -56,11 +56,11 @@ const SettingsView: React.FC = () => {
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Key size={18} className="text-trenchPurple-500"/> API VAULT</h3>
                 <div className="space-y-3">
                     <div className="flex justify-between items-center bg-whale-900 p-3 rounded border border-whale-700">
-                        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> <span className="text-sm text-white">Kraken Futures</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div><span className="text-sm text-white">Kraken Futures</span></div>
                         <button className="text-[10px] text-rose-400 hover:underline">REVOKE</button>
                     </div>
                      <div className="flex justify-between items-center bg-whale-900 p-3 rounded border border-whale-700 opacity-50">
-                        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-slate-600"></span> <span className="text-sm text-slate-400">Binance</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-slate-600"></div><span className="text-sm text-slate-400">Binance</span></div>
                         <button className="text-[10px] text-trenchGold-500 hover:underline">CONNECT</button>
                     </div>
                 </div>
