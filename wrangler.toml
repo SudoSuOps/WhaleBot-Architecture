@@ -1,0 +1,7 @@
+name = "whale-ai"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[ai]
+binding = "AI"
+model = "@hf/mistral/mistral-7b-instruct-v0.2"

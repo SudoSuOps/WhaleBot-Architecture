@@ -8,7 +8,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body = await request.json() as { prompt: string; system: string };
     
-    // Using Mistral 7B Instruct
+    // Model: @cf/mistral/mistral-7b-instruct-v0.1
     const response = await env.AI.run('@cf/mistral/mistral-7b-instruct-v0.1', {
       messages: [
         { role: 'system', content: body.system || "You are WhaleBot." },
