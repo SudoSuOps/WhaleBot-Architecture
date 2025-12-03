@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Activity, Settings, Cpu, Globe, Shield, BookOpen, Brain, BrainCircuit, Server, Wallet, Share2, PlusCircle, MessageSquare, Megaphone } from 'lucide-react';
 import { WhaleLogoFull } from './BrandAssets';
 import IdentityMint from './IdentityMint'; 
