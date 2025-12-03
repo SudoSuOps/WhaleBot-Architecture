@@ -15,6 +15,7 @@ import SettingsView from './components/SettingsView';
 import TrenchCard from './components/TrenchCard';
 import Checkout from './components/Checkout';
 import MacroFeed from './components/MacroFeed';
+import WarRoom from './components/WarRoom';
 import { MarketData, Position, TradeSignal, ClosedTrade, SystemStatus, Timeframe, UserProfile } from './types';
 import { generateAnalysis, getSystemTelemetry } from './services/aiService';
 import { connectToKrakenFutures } from './services/krakenService';
@@ -55,17 +56,14 @@ const App: React.FC = () => {
   
   const [botPositions, setBotPositions] = useState<Position[]>([]); const [botHistory, setBotHistory] = useState<ClosedTrade[]>([]); const [botVault, setBotVault] = useState({ balance: 1000000, initial: 1000000 });
 
-  // Access Control for WhaleBot
   const handleTabChange = (tab: string) => {
-      if (tab === 'whalebot' && (!userProfile || userProfile.tier === 'FREE')) { setShowCheckout(true); return; }
+      if ((tab === 'whalebot' || tab === 'warroom') && (!userProfile || userProfile.tier === 'FREE')) { setShowCheckout(true); return; }
       setActiveTab(tab);
   };
 
   return (
     <Layout activeTab={activeTab} setActiveTab={handleTabChange} vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} initialEquity={initialEquity}>
-      {/* Inserted MacroFeed Here */}
       <MacroFeed />
-      
       {showCheckout && <Checkout onComplete={(p) => { setUserProfile(p); setShowCheckout(false); setActiveTab('whalebot'); }} />}
       {activeTab === 'dashboard' && (
         <>
@@ -77,7 +75,6 @@ const App: React.FC = () => {
                     <TradeHistory history={tradeHistory} />
                 </div>
                 <div className="lg:col-span-1 space-y-6">
-                    {/* SWAPPED: SignalPanel (Chat) is now Top, Execution Middle, Card Bottom */}
                     <SignalPanel prices={prices} selectedAsset={selectedAsset} systemStatus={systemStats} />
                     <TradeExecution currentPrice={prices[selectedAsset] || 0} selectedAsset={selectedAsset} onPlaceOrder={handlePlaceOrder} />
                     <TrenchCard vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} winRate={87} ensName={userProfile ? userProfile.handle : 'trench.perpjeet.eth'} />
@@ -86,6 +83,7 @@ const App: React.FC = () => {
         </>
       )}
       {activeTab === 'whalebot' && <WhaleBotView botPositions={botPositions} botHistory={botHistory} botVault={botVault} />}
+      {activeTab === 'warroom' && <WarRoom />}
       {activeTab === 'network' && <NetworkView />} {activeTab === 'protocol' && <ProtocolView />} {activeTab === 'how-it-works' && <HowItWorksView />} {activeTab === 'strategy' && <StrategyView />}
       {activeTab === 'system' && (<div className="p-8 bg-whale-800 rounded-xl border border-whale-700"><h2 className="text-2xl font-bold text-white mb-4">Rig Telemetry</h2><SystemMonitor stats={systemStats} /></div>)}
       {activeTab === 'settings' && <SettingsView />}

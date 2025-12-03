@@ -20,3 +20,4 @@ export interface ChatMessage { id: string; role: 'user' | 'bot'; text: string; t
 export type Timeframe = '15m' | '1h' | '4h';
 export interface UserProfile { handle: string; rootDomain: 'whaleperp.eth' | 'perpjeet.eth' | 'perpshark.eth' | 'btcsolo.eth'; walletAddress: string; tier: SubscriptionTier; mintTimestamp: number; }
 export type SubscriptionTier = 'FREE' | 'WHALE' | 'GIGA';
+export interface ChatRoomMessage { id: string; sender: string; text: string; timestamp: number; tier: SubscriptionTier; }
