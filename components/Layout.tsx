@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Activity, Settings, Cpu, Globe, Shield, BookOpen, Brain, BrainCircuit, Server, Wallet, Share2, PlusCircle } from 'lucide-react';
 import { WhaleLogoFull } from './BrandAssets';
-import IdentityMint from './IdentityMint'; // Ensure this import
+import IdentityMint from './IdentityMint'; 
 
 interface LayoutProps { children: React.ReactNode; activeTab: string; setActiveTab: (tab: string) => void; vaultEquity: number; initialEquity: number; }
 
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, vaultEquity, initialEquity }) => {
   const navItems = [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }, { id: 'whalebot', label: 'WhaleBot / Copilot', icon: Brain }, { id: 'network', label: 'Network / VPN', icon: Globe }, { id: 'protocol', label: 'The Protocol', icon: Shield }, { id: 'how-it-works', label: 'How It Works', icon: BookOpen }, { id: 'strategy', label: 'Strategy Config', icon: Activity }, { id: 'system', label: 'Rig Status', icon: Cpu }, { id: 'settings', label: 'Settings', icon: Settings }];
   const pnl = vaultEquity - initialEquity; const pnlPct = (pnl / initialEquity) * 100;
-  const [showIdentity, setShowIdentity] = useState(false);
 
   return (
     <div className="flex h-screen bg-whale-950 text-whale-text font-sans overflow-hidden">
@@ -18,14 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, vaul
           <div className="relative z-10 mb-1"><WhaleLogoFull /></div>
           <p className="text-[9px] text-trenchGold-500 font-mono tracking-[0.2em] pl-12 opacity-80">BLACKWELL CORE // v3.4</p>
         </div>
-        
-        {/* IDENTITY SLOT */}
-        <div className="p-4 bg-whale-950/50 border-b border-whale-800">
-            <button onClick={() => setActiveTab('settings')} className="w-full bg-whale-800 hover:bg-whale-700 border border-whale-700 rounded-lg p-3 flex items-center justify-between group transition-colors">
-                <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-gradient-to-tr from-trenchPurple-500 to-diamond-500 flex items-center justify-center text-white font-bold text-xs">ID</div><div className="text-left"><p className="text-[10px] text-slate-400 font-bold uppercase">Identity</p><p className="text-xs text-white font-mono">Mint Handle</p></div></div><PlusCircle size={16} className="text-slate-500 group-hover:text-trenchGold-500"/>
-            </button>
-        </div>
-
+        <div className="p-4 bg-whale-950/50 border-b border-whale-800"><button onClick={() => setActiveTab('settings')} className="w-full bg-whale-800 hover:bg-whale-700 border border-whale-700 rounded-lg p-3 flex items-center justify-between group transition-colors"><div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-gradient-to-tr from-trenchPurple-500 to-diamond-500 flex items-center justify-center text-white font-bold text-xs">ID</div><div className="text-left"><p className="text-[10px] text-slate-400 font-bold uppercase">Identity</p><p className="text-xs text-white font-mono">Mint Handle</p></div></div><PlusCircle size={16} className="text-slate-500 group-hover:text-trenchGold-500"/></button></div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">{navItems.map((item) => (<button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 border border-transparent ${activeTab === item.id ? 'bg-whale-800 text-trenchGold-500 border-l-trenchGold-500 border-l-4 shadow-[0_4px_20px_rgba(0,0,0,0.3)]' : 'hover:bg-whale-800 hover:text-white hover:border-whale-700'}`}><item.icon size={20} className={activeTab === item.id ? 'animate-pulse' : ''} /><span className={`font-medium ${activeTab === item.id ? 'font-bold' : ''}`}>{item.label}</span></button>))}</nav>
         <div className="p-4 bg-whale-900 border-t border-whale-700">
             <div className="bg-gradient-to-br from-whale-800 to-whale-900 rounded-lg p-3 border border-whale-700 shadow-inner group relative overflow-hidden">

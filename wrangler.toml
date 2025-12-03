@@ -1,7 +1,6 @@
-name = "whale-ai"
-main = "src/index.ts"
-compatibility_date = "2024-11-01"
+name = "whalebot-architecture"
+compatibility_date = "2024-04-05"
+pages_build_output_dir = "dist"
 
 [ai]
 binding = "AI"
-model = "@hf/mistral/mistral-7b-instruct-v0.2"

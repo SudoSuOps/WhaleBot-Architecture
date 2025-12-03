@@ -63,7 +63,9 @@ const App: React.FC = () => {
 
   return (
     <Layout activeTab={activeTab} setActiveTab={handleTabChange} vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} initialEquity={initialEquity}>
+      {/* Inserted MacroFeed Here */}
       <MacroFeed />
+      
       {showCheckout && <Checkout onComplete={(p) => { setUserProfile(p); setShowCheckout(false); setActiveTab('whalebot'); }} />}
       {activeTab === 'dashboard' && (
         <>

@@ -5,7 +5,25 @@ import { getMiningStats } from './miningService';
 
 let apiBackoffUntil = 0;
 
+// Helper to call local Cloudflare Worker AI if available
+const callWorkerAI = async (prompt: string, systemContext: string) => {
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, system: systemContext })
+        });
+        if (!res.ok) throw new Error('Worker AI Error');
+        const data = await res.json();
+        return data.response;
+    } catch (e) {
+        console.warn("Worker AI Failed (using simulation fallback):", e);
+        return null;
+    }
+};
+
 export const generateAnalysis = async (currentPrice: number, asset: string): Promise<TradeSignal> => {
+  // Priority 1: Google Gemini (Paid Key)
   if (process.env.API_KEY && Date.now() > apiBackoffUntil) { 
     try { 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY }); 
@@ -14,10 +32,24 @@ export const generateAnalysis = async (currentPrice: number, asset: string): Pro
       const text = response.text; if (text) return JSON.parse(text) as TradeSignal; 
     } catch (e: any) { 
       if (e.toString().includes('429') || e.status === 429) { 
-        console.warn("[WhaleBot] Rate Limit Hit. Switching to Local Inference."); apiBackoffUntil = Date.now() + 60000; 
+        console.warn("[WhaleBot] Rate Limit Hit. Switching strategies."); apiBackoffUntil = Date.now() + 60000; 
       }
     }
   }
+  
+  // Priority 2: Sovereign Worker AI (Cloudflare)
+  const systemPrompt = "You are a high-frequency trading bot. Output JSON only. Format: { asset, direction, confidence, reasoning, timestamp, indicators: { rsi, macd, volume } }";
+  const userPrompt = `Analyze ${asset} at $${currentPrice}. Return JSON matching TradeSignal interface.`;
+  const workerResponse = await callWorkerAI(userPrompt, systemPrompt);
+  
+  if (workerResponse) {
+      try {
+          const jsonStr = workerResponse.replace(/```json/g, '').replace(/```/g, '');
+          return JSON.parse(jsonStr) as TradeSignal;
+      } catch (e) { console.warn("Failed to parse Worker AI JSON"); }
+  }
+
+  // Priority 3: Local Simulation (Offline)
   const isBullish = Math.random() > 0.5; const confidence = 60 + Math.floor(Math.random() * 38);
   return { asset, direction: confidence > WHALE_CONFIG.entry.signalThreshold ? (isBullish ? 'LONG' : 'SHORT') : 'NEUTRAL', confidence, reasoning: isBullish ? "Bullish divergence detected on 15m timeframe. Accumulation volume rising." : "Bearish rejection at key resistance level. Momentum slowing down.", timestamp: Date.now(), indicators: { rsi: isBullish ? 35 + Math.random() * 10 : 65 - Math.random() * 10, macd: isBullish ? 'CROSS_UP' : 'CROSS_DOWN', volume: 1.2 + Math.random() } };
 };
@@ -66,7 +98,7 @@ export const queryWhaleBot = async (query: string, context: SystemStatus, prices
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1000));
     const isTrench = Math.random() > 0.3; const trenchWord = isTrench ? TRENCH_VOCAB[Math.floor(Math.random() * TRENCH_VOCAB.length)] : '';
     
-    // LIVE API CALL
+    // 1. Try Gemini (Paid)
     if (process.env.API_KEY && Date.now() > apiBackoffUntil) {
        try {
           const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -74,12 +106,22 @@ export const queryWhaleBot = async (query: string, context: SystemStatus, prices
           const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
           return response.text || "Analysis stream interrupted.";
        } catch (e: any) {
-          if (e.toString().includes('429') || e.status === 429) { console.warn("[WhaleBot] Rate Limit Hit. Local Mode."); apiBackoffUntil = Date.now() + 60000; }
+          if (e.toString().includes('429') || e.status === 429) { console.warn("[WhaleBot] Rate Limit Hit. Switching to Worker AI."); apiBackoffUntil = Date.now() + 60000; }
        }
     }
 
-    if (q.includes('quant') || q.includes('score') || q.includes('probability')) { return `**${targetAsset} Analysis:** Quant Engine is reading **${scorePct}% (${bias})**. The primary driver is **${quantMetrics.signals[0].name}**. I am ${flavor}. Looks like the ${trenchWord} might get REKT if this holds.`; }
-    if (q.includes('whale') || q.includes('flow') || q.includes('money')) { const assetFlows = whaleFeed.filter(tx => tx.asset === targetAsset); const recentHighImpact = assetFlows.find(tx => tx.impact === 'HIGH') || whaleFeed.find(tx => tx.impact === 'HIGH'); if (recentHighImpact) { return `Tracking smart money on **${recentHighImpact.asset}**. **${recentHighImpact.entity}** just **${recentHighImpact.action}** ($${(recentHighImpact.amount/1000000).toFixed(1)}M). Big players are moving. Don't be ${trenchWord}.`; } return `Whale flows are mixed. I'm seeing net distribution on majors but accumulation on trenches. Keep an eye on Wintermute's hot wallet activity regarding ${targetAsset}.`; }
-    if (q.includes('price') || q.includes('prediction') || q.includes('target') || q.includes('entry')) { const target = bias.includes('LONG') ? currentPrice * 1.025 : currentPrice * 0.975; return `**${targetAsset} @ $${currentPrice.toFixed(4)}**: Microstructure suggests a move towards **$${target.toFixed(4)}** in the next 4h window if Quant Score > ${scorePct}%. Watch for the ${trenchWord}.`; }
-    return `Analyzing **${targetAsset}** ($${currentPrice.toFixed(4)})... Volume profile is ${Math.random() > 0.5 ? 'accumulating' : 'distributing'}. Quant score of ${scorePct}% indicates a ${bias.toLowerCase()} edge. I am currently ${flavor}. Prepare for ${trenchWord}.`;
+    // 2. Try Worker AI (Sovereign)
+    const systemPrompt = `You are WhaleBot, a trench-native crypto trading AI running on Cloudflare Edge GPUs. 
+    Current Market Context: 
+    - Asset: ${targetAsset}
+    - Price: $${currentPrice}
+    - Quant Score: ${scorePct}% (${bias})
+    
+    Answer the user in a professional yet crypto-native style. Be concise.`;
+    
+    const workerResponse = await callWorkerAI(query, systemPrompt);
+    if (workerResponse) return workerResponse;
+
+    // 3. Fallback (Offline)
+    return `[OFFLINE MODE] Analyzing **${targetAsset}** ($${currentPrice.toFixed(4)})... Volume profile is ${Math.random() > 0.5 ? 'accumulating' : 'distributing'}. Quant score of ${scorePct}% indicates a ${bias.toLowerCase()} edge. I am currently ${flavor}. Prepare for ${trenchWord}.`;
 };

@@ -1,5 +1,5 @@
 export const WHALE_CONFIG = {
-    name: "Paper Whale", version: "3.4.0", codename: "DIAMOND FINS v3.4 (AI Core Edition)",
+    name: "Paper Whale", version: "3.4.0", codename: "DIAMOND FINS v3.4 (Sovereign Edition)",
     sizing: { maxLongSize: 25000, maxShortSize: 25000, leverage: 10, maxExposure: 50000, minTradeSize: 1000 },
     entry: { signalThreshold: 70, long: { minConfidence: 70, indicators: { rsiOversold: 35, macdCrossUp: true, volumeSpike: 1.5, priceAboveEMA: false } }, short: { minConfidence: 70, indicators: { rsiOverbought: 65, macdCrossDown: true, volumeSpike: 1.5, priceBelowEMA: false } }, cooldownMinutes: 15 },
     exit: { takeProfit: { enabled: true, percentage: 3.0, trailingEnabled: true, trailingActivation: 2.0, trailingDistance: 1.0 }, stopLoss: { enabled: true, percentage: 5.0, dynamicEnabled: true, minStop: 3.0, maxStop: 10.0, atrMultiplier: 1.5 }, timeExit: { enabled: true, maxHoldHours: 8, minHoldMinutes: 30 }, signalExit: { enabled: true, reverseThreshold: 60 } },
