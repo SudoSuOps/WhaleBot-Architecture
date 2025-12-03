@@ -63,11 +63,26 @@ const App: React.FC = () => {
 
   return (
     <Layout activeTab={activeTab} setActiveTab={handleTabChange} vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} initialEquity={initialEquity}>
-      {/* Inserted MacroFeed Here */}
       <MacroFeed />
-      
       {showCheckout && <Checkout onComplete={(p) => { setUserProfile(p); setShowCheckout(false); setActiveTab('whalebot'); }} />}
-      {activeTab === 'dashboard' && (<><SystemMonitor stats={systemStats} /><div className="grid grid-cols-1 lg:grid-cols-3 gap-6"><div className="lg:col-span-2 space-y-6"><TradingChart data={chartDataMap[selectedAsset] || []} currentPrice={prices[selectedAsset] || 0} selectedAsset={selectedAsset} onAssetChange={setSelectedAsset} dataSource={dataSource} onDataSourceChange={setDataSource} timeframe={timeframe} onTimeframeChange={setTimeframe} /><PositionsTable positions={positions} onClosePosition={handleClosePosition} /><TradeHistory history={tradeHistory} /></div><div className="lg:col-span-1 space-y-6"><TradeExecution currentPrice={prices[selectedAsset] || 0} selectedAsset={selectedAsset} onPlaceOrder={handlePlaceOrder} /><SignalPanel prices={prices} selectedAsset={selectedAsset} systemStatus={systemStats} /><TrenchCard vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} winRate={87} ensName={userProfile ? userProfile.handle : 'trench.perpjeet.eth'} /></div></div></>)}
+      {activeTab === 'dashboard' && (
+        <>
+            <SystemMonitor stats={systemStats} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <TradingChart data={chartDataMap[selectedAsset] || []} currentPrice={prices[selectedAsset] || 0} selectedAsset={selectedAsset} onAssetChange={setSelectedAsset} dataSource={dataSource} onDataSourceChange={setDataSource} timeframe={timeframe} onTimeframeChange={setTimeframe} />
+                    <PositionsTable positions={positions} onClosePosition={handleClosePosition} />
+                    <TradeHistory history={tradeHistory} />
+                </div>
+                <div className="lg:col-span-1 space-y-6">
+                    {/* SWAPPED: SignalPanel (Chat) is now Top, Execution Middle, Card Bottom */}
+                    <SignalPanel prices={prices} selectedAsset={selectedAsset} systemStatus={systemStats} />
+                    <TradeExecution currentPrice={prices[selectedAsset] || 0} selectedAsset={selectedAsset} onPlaceOrder={handlePlaceOrder} />
+                    <TrenchCard vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} winRate={87} ensName={userProfile ? userProfile.handle : 'trench.perpjeet.eth'} />
+                </div>
+            </div>
+        </>
+      )}
       {activeTab === 'whalebot' && <WhaleBotView botPositions={botPositions} botHistory={botHistory} botVault={botVault} />}
       {activeTab === 'network' && <NetworkView />} {activeTab === 'protocol' && <ProtocolView />} {activeTab === 'how-it-works' && <HowItWorksView />} {activeTab === 'strategy' && <StrategyView />}
       {activeTab === 'system' && (<div className="p-8 bg-whale-800 rounded-xl border border-whale-700"><h2 className="text-2xl font-bold text-white mb-4">Rig Telemetry</h2><SystemMonitor stats={systemStats} /></div>)}

@@ -8,7 +8,7 @@ interface SignalPanelProps { prices: Record<string, number>; selectedAsset: stri
 const SignalPanel: React.FC<SignalPanelProps> = ({ prices, selectedAsset, systemStatus }) => {
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([{ id: 'init', role: 'bot', text: `WhaleBot v3.2 Online. Connected to 6x RTX 5090 Cluster.\nMonitoring ${selectedAsset} real-time data feeds.\nHow can I assist your execution?`, timestamp: Date.now() }]);
+  const [messages, setMessages] = useState<ChatMessage[]>([{ id: 'init', role: 'bot', text: `WhaleBot v3.4 Online. Connected to 6x RTX 5090 Cluster.\nMonitoring ${selectedAsset} real-time data feeds.\nHow can I assist your execution?`, timestamp: Date.now() }]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, isThinking]);

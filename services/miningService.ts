@@ -1,9 +1,5 @@
 import { MiningStats } from '../types';
-
-let currentHashrate = 450; // TH/s
-let blockHeight = 845230;
-let lastBlockTime = Date.now();
-
+let currentHashrate = 450; let blockHeight = 845230; let lastBlockTime = Date.now();
 export const getMiningStats = (): MiningStats => {
     currentHashrate = currentHashrate + (Math.random() * 20 - 10);
     if (Date.now() - lastBlockTime > 1000 * 60 * 10) { blockHeight++; lastBlockTime = Date.now(); }
