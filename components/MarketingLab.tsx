@@ -1,0 +1,95 @@
+import React, { useState } from 'react';
+import TrenchCard from './TrenchCard';
+import { Share2, Twitter, Copy, CheckCircle, Download } from 'lucide-react';
+import { UserProfile } from '../types';
+
+interface MarketingLabProps {
+    vaultEquity: number;
+    userProfile: UserProfile | null;
+}
+
+const MarketingLab: React.FC<MarketingLabProps> = ({ vaultEquity, userProfile }) => {
+    const handle = userProfile ? userProfile.handle : 'trench.perpjeet.eth';
+    const [copied, setCopied] = useState(false);
+
+    const shareText = `Just initialized my local trading node on WhalePerp. 🐳\n\nIdentity: ${handle}\nCompute: 6x RTX 5090 Cluster\nStatus: DEPLOYED\n\nNot a casino. Real hardware. Join the trench:\nhttps://whaleperp.com`;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(shareText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleTwitter = () => {
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+        window.open(url, '_blank');
+    };
+
+    return (
+        <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 pb-12">
+            
+            <div className="mb-8 text-center">
+                <h1 className="text-3xl font-black text-white tracking-tight mb-2">SHARE ALPHA LAB</h1>
+                <p className="text-slate-400">Generate proof of compute. Flex your identity. Recruit degens.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                {/* LEFT: The Asset */}
+                <div className="flex flex-col items-center gap-6">
+                    <div className="relative group cursor-pointer transform transition-transform hover:scale-[1.02]">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-trenchGold-500 to-trenchPurple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                        <div className="relative">
+                            <TrenchCard vaultEquity={vaultEquity} winRate={87} ensName={handle} />
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <button className="flex items-center gap-2 text-xs text-slate-500 hover:text-white transition-colors">
+                            <Download size={14} /> Download HD Asset
+                        </button>
+                    </div>
+                </div>
+
+                {/* RIGHT: The Narrative */}
+                <div className="bg-whale-800 border border-whale-700 rounded-xl p-6">
+                    <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                        <Share2 size={18} className="text-diamond-500" />
+                        TRANSMISSION MESSAGE
+                    </h3>
+                    
+                    <textarea 
+                        className="w-full h-40 bg-whale-900 border border-whale-700 rounded-lg p-4 text-slate-300 font-mono text-sm focus:outline-none focus:border-trenchGold-500 resize-none mb-4"
+                        value={shareText}
+                        readOnly
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={handleCopy}
+                            className={`flex items-center justify-center gap-2 py-3 rounded-lg font-bold border transition-all ${copied ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-whale-700 border-whale-600 text-white hover:bg-whale-600'}`}
+                        >
+                            {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
+                            {copied ? 'COPIED' : 'COPY TEXT'}
+                        </button>
+                        
+                        <button 
+                            onClick={handleTwitter}
+                            className="flex items-center justify-center gap-2 py-3 rounded-lg font-bold bg-[#1DA1F2] hover:bg-[#1a91da] text-white shadow-lg transition-transform active:scale-95"
+                        >
+                            <Twitter size={18} fill="currentColor" />
+                            POST TO X
+                        </button>
+                    </div>
+                    
+                    <div className="mt-6 pt-6 border-t border-whale-700 text-center">
+                        <p className="text-[10px] text-slate-500">
+                            EARN 10% COMMISSION ON REFERRALS VIA <span className="text-white font-bold">WHALE-9031</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+};
+export default MarketingLab;

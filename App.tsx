@@ -16,6 +16,7 @@ import TrenchCard from './components/TrenchCard';
 import Checkout from './components/Checkout';
 import MacroFeed from './components/MacroFeed';
 import WarRoom from './components/WarRoom';
+import MarketingLab from './components/MarketingLab';
 import { MarketData, Position, TradeSignal, ClosedTrade, SystemStatus, Timeframe, UserProfile } from './types';
 import { generateAnalysis, getSystemTelemetry } from './services/aiService';
 import { connectToKrakenFutures } from './services/krakenService';
@@ -65,8 +66,11 @@ const App: React.FC = () => {
       setActiveTab(tab);
   };
 
+  // Calculate Real Equity
+  const currentEquity = vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0);
+
   return (
-    <Layout activeTab={activeTab} setActiveTab={handleTabChange} vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} initialEquity={initialEquity}>
+    <Layout activeTab={activeTab} setActiveTab={handleTabChange} vaultEquity={currentEquity} initialEquity={initialEquity}>
       <MacroFeed />
       {showCheckout && <Checkout onComplete={(p) => { setUserProfile(p); setShowCheckout(false); setActiveTab('whalebot'); }} />}
       {activeTab === 'dashboard' && (
@@ -81,13 +85,14 @@ const App: React.FC = () => {
                 <div className="lg:col-span-1 space-y-6">
                     <SignalPanel prices={prices} selectedAsset={selectedAsset} systemStatus={systemStats} />
                     <TradeExecution currentPrice={prices[selectedAsset] || 0} selectedAsset={selectedAsset} onPlaceOrder={handlePlaceOrder} />
-                    <TrenchCard vaultEquity={vaultEquity + positions.reduce((acc, p) => acc + p.pnl, 0)} winRate={87} ensName={userProfile ? userProfile.handle : 'trench.perpjeet.eth'} />
+                    <TrenchCard vaultEquity={currentEquity} winRate={87} ensName={userProfile ? userProfile.handle : 'trench.perpjeet.eth'} />
                 </div>
             </div>
         </>
       )}
       {activeTab === 'whalebot' && <WhaleBotView botPositions={botPositions} botHistory={botHistory} botVault={botVault} />}
       {activeTab === 'warroom' && <WarRoom />}
+      {activeTab === 'marketing' && <MarketingLab vaultEquity={currentEquity} userProfile={userProfile} />}
       {activeTab === 'network' && <NetworkView />} {activeTab === 'protocol' && <ProtocolView />} {activeTab === 'how-it-works' && <HowItWorksView />} {activeTab === 'strategy' && <StrategyView />}
       {activeTab === 'system' && (<div className="p-8 bg-whale-800 rounded-xl border border-whale-700"><h2 className="text-2xl font-bold text-white mb-4">Rig Telemetry</h2><SystemMonitor stats={systemStats} /></div>)}
       {activeTab === 'settings' && <SettingsView />}
