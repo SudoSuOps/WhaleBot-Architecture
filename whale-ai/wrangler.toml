@@ -1,0 +1,6 @@
+name = "whale-ai"
+main = "src/index.ts"
+compatibility_date = "2025-12-02"
+
+[ai]
+binding = "AI"
