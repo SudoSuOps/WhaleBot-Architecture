@@ -68,7 +68,8 @@ const App: React.FC = () => {
       {activeTab === 'whalebot' && <WhaleBotView botPositions={botPositions} botHistory={botHistory} botVault={botVault} />}
       {activeTab === 'warroom' && <WarRoom />}
       {activeTab === 'marketing' && <MarketingLab vaultEquity={currentEquity} userProfile={userProfile} />}
-      {activeTab === 'meme-reactor' && <MemeReactor />}
+      {/* Pass Props to MemeReactor */}
+      {activeTab === 'meme-reactor' && <MemeReactor positions={positions} whaleFeed={systemStats.whaleFeed} />}
       {activeTab === 'network' && <NetworkView />} {activeTab === 'protocol' && <ProtocolView />} {activeTab === 'how-it-works' && <HowItWorksView />} {activeTab === 'strategy' && <StrategyView />}
       {activeTab === 'system' && (<div className="p-8 bg-whale-800 rounded-xl border border-whale-700"><h2 className="text-2xl font-bold text-white mb-4">Rig Telemetry</h2><SystemMonitor stats={systemStats} /></div>)}
       {activeTab === 'settings' && <SettingsView />}
