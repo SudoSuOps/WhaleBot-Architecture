@@ -38,28 +38,28 @@ const QuantEngine: React.FC<QuantEngineProps> = ({ metrics, regime }) => {
     };
 
     return (
-        <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-6 relative overflow-hidden shadow-lg h-full flex flex-col">
+        <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-6 relative overflow-hidden shadow-lg h-full flex flex-col min-h-[500px]">
             <div className="absolute top-0 right-0 p-4 opacity-5"><Activity size={150} /></div>
             
             {/* HEADER */}
-            <div className="flex justify-between items-start mb-6 relative z-10">
+            <div className="flex justify-between items-start mb-4 relative z-10">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Crosshair className="text-diamond-500" size={20} />
-                        <h3 className="font-bold text-white tracking-wide">QUANT ENGINE v2</h3>
+                        <h3 className="font-bold text-white tracking-wide">QUANT ENGINE v2.1</h3>
                     </div>
                     <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">Probability & Microstructure</p>
                 </div>
                 {getRegimeBadge(regime)}
             </div>
 
-            {/* GAUGE & SCORE */}
-            <div className="flex flex-col items-center justify-center py-4 relative z-10">
-                <div className="relative w-48 h-24 overflow-hidden mb-2">
+            {/* GAUGE & SCORE (Fixed Padding) */}
+            <div className="flex flex-col items-center justify-center py-8 relative z-10 flex-shrink-0">
+                <div className="relative w-40 h-20 overflow-hidden mb-2">
                      {/* Gauge Background */}
-                    <div className="absolute top-0 left-0 w-full h-full bg-whale-900 rounded-t-full border-t-[12px] border-l-[12px] border-r-[12px] border-whale-700"></div>
+                    <div className="absolute top-0 left-0 w-full h-full bg-whale-900 rounded-t-full border-t-[10px] border-l-[10px] border-r-[10px] border-whale-700"></div>
                     {/* Gauge Fill */}
-                    <div className="absolute top-0 left-0 w-full h-full rounded-t-full border-t-[12px] border-l-[12px] border-r-[12px] border-transparent transition-all duration-700 ease-out" 
+                    <div className="absolute top-0 left-0 w-full h-full rounded-t-full border-t-[10px] border-l-[10px] border-r-[10px] border-transparent transition-all duration-700 ease-out" 
                          style={{
                              borderColor: metrics.totalScore > 0.7 ? '#34d399' : metrics.totalScore < 0.3 ? '#fb7185' : '#94a3b8',
                              transform: `rotate(${(metrics.totalScore * 180) - 180}deg)`,
@@ -67,19 +67,19 @@ const QuantEngine: React.FC<QuantEngineProps> = ({ metrics, regime }) => {
                          }}></div>
                 </div>
                 <div className="text-center -mt-6">
-                    <p className={`text-5xl font-black font-mono tracking-tighter ${getScoreColor(scorePct)}`}>
-                        {scorePct}<span className="text-2xl">%</span>
+                    <p className={`text-4xl font-black font-mono tracking-tighter ${getScoreColor(scorePct)}`}>
+                        {scorePct}<span className="text-lg">%</span>
                     </p>
-                    <p className={`text-xs font-bold mt-1 uppercase tracking-[0.2em] ${getScoreColor(scorePct)}`}>
+                    <p className={`text-[10px] font-bold mt-1 uppercase tracking-[0.2em] ${getScoreColor(scorePct)}`}>
                         {metrics.bias.replace('_', ' ')}
                     </p>
                 </div>
             </div>
 
             {/* NARRATIVE LAYER */}
-            <div className="bg-whale-900/50 border border-whale-700 rounded-lg p-3 mb-6 relative z-10">
+            <div className="bg-whale-900/50 border border-whale-700 rounded-lg p-3 mb-4 relative z-10">
                 <div className="flex gap-2">
-                    <div className="mt-1"><Zap size={12} className="text-trenchGold-500 animate-pulse" /></div>
+                    <div className="mt-0.5"><Zap size={12} className="text-trenchGold-500 animate-pulse" /></div>
                     <p className="text-xs text-slate-300 font-mono leading-relaxed">
                         <span className="text-trenchGold-500 font-bold">{'>'}</span> {narrative}
                     </p>
@@ -87,7 +87,7 @@ const QuantEngine: React.FC<QuantEngineProps> = ({ metrics, regime }) => {
             </div>
 
             {/* SIGNAL STRIP */}
-            <div className="space-y-2 relative z-10 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-whale-700">
+            <div className="space-y-2 relative z-10 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-whale-700 pb-2">
                 <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-2 font-bold">Micro-Signal Confluence</p>
                 {metrics.signals.map(sig => (
                     <div key={sig.id} className="flex items-center justify-between group">
@@ -96,7 +96,7 @@ const QuantEngine: React.FC<QuantEngineProps> = ({ metrics, regime }) => {
                             <span className="text-[10px] text-slate-400 font-mono group-hover:text-white transition-colors">{sig.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-16 h-1 bg-whale-900 rounded-full overflow-hidden">
+                            <div className="w-12 h-1 bg-whale-900 rounded-full overflow-hidden">
                                 <div className={`h-full transition-all duration-500 ${getBarColor(sig.score)}`} style={{width: `${sig.score * 100}%`}}></div>
                             </div>
                             <span className={`text-[9px] font-mono w-6 text-right ${getScoreColor(sig.score * 100)}`}>{(sig.score * 100).toFixed(0)}</span>
