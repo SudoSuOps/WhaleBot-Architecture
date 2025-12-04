@@ -21,3 +21,23 @@ export type Timeframe = '15m' | '1h' | '4h';
 export interface UserProfile { handle: string; rootDomain: 'whaleperp.eth' | 'perpjeet.eth' | 'perpshark.eth' | 'btcsolo.eth'; walletAddress: string; tier: SubscriptionTier; mintTimestamp: number; }
 export type SubscriptionTier = 'FREE' | 'WHALE' | 'GIGA';
 export interface ChatRoomMessage { id: string; sender: string; text: string; timestamp: number; tier: SubscriptionTier; isSystem?: boolean; }
+
+// --- MEME REACTOR TYPES ---
+export interface MemeContext {
+  persona: string;
+  asset: string;
+  side: 'LONG' | 'SHORT' | 'FLAT';
+  leverage: number;
+  pnl_pct: number;
+  funding: string;
+  context_text: string;
+}
+
+export interface MemeResponse {
+  headline: string;
+  subline: string;
+  tone: string;
+  risk_vibe: string;
+  bg_style: 'WHALE_DEPTH_METAL' | 'GOAT_SUMMIT_GOLD' | 'APE_CANDLE_FOREST' | 'SHARK_TRENCH_ABYSS' | 'TERMINAL_MONITOR_GLOW' | 'GPU_RACK_NEBULA' | 'CASINO_RUG_ALERT';
+  hashtags: string[];
+}
