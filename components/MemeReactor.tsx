@@ -1,0 +1,161 @@
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Image as ImageIcon, Share2, Twitter, Copy, Zap, RefreshCw, Aperture, Skull, Smile } from 'lucide-react';
+import { generateMemeText } from '../services/memeService';
+import { WhaleLogoIcon } from './BrandAssets';
+
+const PERSONALITIES = [
+    { id: 'WHALEBOT', name: 'WhaleBot AI', icon: <Zap size={16} className="text-diamond-500"/>, color: 'border-diamond-500/30 text-diamond-400' },
+    { id: 'PERPGOAT', name: 'PerpGoat', icon: <Skull size={16} className="text-rose-500"/>, color: 'border-rose-500/30 text-rose-400' },
+    { id: 'PERPSHARK', name: 'PerpShark', icon: <Aperture size={16} className="text-trenchGold-500"/>, color: 'border-trenchGold-500/30 text-trenchGold-400' },
+    { id: 'PERPJEET', name: 'PerpJeet', icon: <Smile size={16} className="text-emerald-500"/>, color: 'border-emerald-500/30 text-emerald-400' },
+];
+
+const MemeReactor: React.FC = () => {
+    const [topic, setTopic] = useState('BTC PUMP');
+    const [personality, setPersonality] = useState('WHALEBOT');
+    const [generatedContent, setGeneratedContent] = useState<string | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [feed, setFeed] = useState<Array<{id: string, text: string, author: string, timestamp: number}>>([]);
+
+    // Auto-generate feed
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            if (Math.random() > 0.8) {
+                const p = PERSONALITIES[Math.floor(Math.random() * PERSONALITIES.length)];
+                const t = await generateMemeText('MARKET', p.id as any);
+                setFeed(prev => [{
+                    id: Date.now().toString(),
+                    text: t,
+                    author: p.name,
+                    timestamp: Date.now()
+                }, ...prev.slice(0, 20)]);
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleGenerate = async () => {
+        setIsGenerating(true);
+        const text = await generateMemeText(topic, personality as any);
+        setGeneratedContent(text);
+        setFeed(prev => [{
+            id: Date.now().toString(),
+            text: text,
+            author: PERSONALITIES.find(p => p.id === personality)?.name || 'AI',
+            timestamp: Date.now()
+        }, ...prev]);
+        setIsGenerating(false);
+    };
+
+    return (
+        <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 pb-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* LEFT: GENERATOR CONSOLE */}
+            <div className="lg:col-span-2 space-y-8">
+                <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5"><Sparkles size={150} /></div>
+                    
+                    <div className="flex items-center gap-3 mb-6 relative z-10">
+                        <Sparkles className="text-trenchGold-500" size={28} />
+                        <h1 className="text-3xl font-black text-white tracking-tight">DEGEN MEME REACTOR <span className="text-xs text-trenchPurple-500 ml-2 bg-trenchPurple-500/10 px-2 py-1 rounded font-mono border border-trenchPurple-500/30">v1.0</span></h1>
+                    </div>
+
+                    <div className="space-y-6 relative z-10">
+                        {/* Personality Select */}
+                        <div>
+                            <label className="text-xs text-slate-400 uppercase tracking-wider mb-3 block font-bold">Select Personality Engine</label>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {PERSONALITIES.map(p => (
+                                    <button 
+                                        key={p.id}
+                                        onClick={() => setPersonality(p.id)}
+                                        className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${personality === p.id ? `bg-whale-900 ${p.color} shadow-[0_0_15px_rgba(0,0,0,0.3)] ring-1 ring-white/10` : 'bg-whale-900/50 border-whale-700 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        {p.icon} <span className="text-xs font-bold">{p.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Input */}
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                value={topic} 
+                                onChange={e => setTopic(e.target.value)}
+                                className="flex-1 bg-whale-900 border border-whale-700 rounded-lg px-4 py-3 text-white focus:border-trenchGold-500 outline-none font-mono"
+                                placeholder="Enter topic (e.g. ETH DUMP, JEETS, FUNDING)..."
+                            />
+                            <button 
+                                onClick={handleGenerate}
+                                disabled={isGenerating}
+                                className="bg-trenchGold-500 hover:bg-trenchGold-400 text-whale-900 font-bold px-6 py-3 rounded-lg transition-transform active:scale-95 flex items-center gap-2"
+                            >
+                                {isGenerating ? <RefreshCw className="animate-spin" size={20}/> : <Zap size={20} fill="currentColor"/>}
+                                GENERATE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* PREVIEW AREA */}
+                {generatedContent && (
+                    <div className="bg-whale-900 border border-whale-700 rounded-xl overflow-hidden shadow-2xl">
+                        <div className="aspect-video bg-gradient-to-br from-whale-900 to-black relative flex items-center justify-center p-12 text-center group">
+                             {/* Background Noise */}
+                            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-trenchGold-500/5 to-trenchPurple-500/10"></div>
+                            
+                            {/* Watermark */}
+                            <div className="absolute bottom-4 right-4 opacity-50 flex items-center gap-2">
+                                <WhaleLogoIcon className="w-6 h-6"/>
+                                <span className="text-xs font-black text-white tracking-widest">WHALEPERP.ETH</span>
+                            </div>
+
+                            {/* Content */}
+                            <div className="relative z-10">
+                                <h2 className="text-3xl md:text-4xl font-black text-white leading-tight drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] font-sans uppercase italic">
+                                    "{generatedContent}"
+                                </h2>
+                            </div>
+                        </div>
+                        <div className="bg-whale-800 p-4 flex justify-between items-center border-t border-whale-700">
+                            <div className="flex gap-2">
+                                <button className="p-2 bg-whale-700 hover:bg-whale-600 rounded text-slate-300 transition-colors"><Copy size={18}/></button>
+                                <button className="p-2 bg-whale-700 hover:bg-whale-600 rounded text-slate-300 transition-colors"><Share2 size={18}/></button>
+                            </div>
+                            <button className="flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#1a91da] text-white px-4 py-2 rounded font-bold text-xs transition-transform active:scale-95">
+                                <Twitter size={14} fill="currentColor"/> POST TO X
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* RIGHT: LIVE MEME FEED */}
+            <div className="lg:col-span-1 bg-whale-900 border border-whale-700 rounded-xl flex flex-col h-[600px]">
+                <div className="p-4 border-b border-whale-800 bg-whale-800/50">
+                    <h3 className="font-bold text-white flex items-center gap-2">
+                        <ImageIcon size={18} className="text-trenchPurple-500"/> LIVE FEED
+                    </h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-whale-700">
+                    {feed.map(post => (
+                        <div key={post.id} className="bg-whale-800 rounded-lg p-4 border border-whale-700 animate-in slide-in-from-right-4 duration-300">
+                            <div className="flex justify-between items-start mb-2">
+                                <span className="text-xs font-bold text-trenchGold-500">{post.author}</span>
+                                <span className="text-[10px] text-slate-600">{new Date(post.timestamp).toLocaleTimeString()}</span>
+                            </div>
+                            <p className="text-sm text-slate-300 italic">"{post.text}"</p>
+                            <div className="mt-3 flex justify-end">
+                                <button className="text-slate-500 hover:text-white transition-colors"><Share2 size={14}/></button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+        </div>
+    );
+};
+export default MemeReactor;
