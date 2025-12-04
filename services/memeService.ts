@@ -1,144 +1,141 @@
 import { MemeContext, MemeResponse } from '../types';
 
-const BG_PRESETS: Record<string, { gradientFrom: string, gradientTo: string, accent: string, shape: 'RINGS' | 'PEAKS' | 'GRID' | 'CHAOS' }> = {
-  WHALE_DEPTH_METAL: { gradientFrom: '#02091f', gradientTo: '#071d3b', accent: '#38bdf8', shape: 'RINGS' },
-  GOAT_SUMMIT_GOLD: { gradientFrom: '#1b0b03', gradientTo: '#5b3200', accent: '#facc15', shape: 'PEAKS' },
-  APE_CANDLE_FOREST: { gradientFrom: '#040f0e', gradientTo: '#064e3b', accent: '#22c55e', shape: 'CHAOS' },
-  SHARK_TRENCH_ABYSS: { gradientFrom: '#020617', gradientTo: '#0f172a', accent: '#60a5fa', shape: 'RINGS' },
-  TERMINAL_MONITOR_GLOW: { gradientFrom: '#000000', gradientTo: '#111827', accent: '#10b981', shape: 'GRID' },
-  GPU_RACK_NEBULA: { gradientFrom: '#2e1065', gradientTo: '#000000', accent: '#c084fc', shape: 'CHAOS' },
-  CASINO_RUG_ALERT: { gradientFrom: '#450a0a', gradientTo: '#000000', accent: '#f43f5e', shape: 'GRID' },
-};
+export const generateMemeJSON = async (ctx: MemeContext): Promise<string> => {
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-// Simulated LLM Response Generator (In prod, this calls your Cloudflare AI Worker with the JSON schema)
-export const generateMemeJSON = async (ctx: MemeContext): Promise<MemeResponse> => {
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Fake think time
-
-    // Simple heuristic to pick a "Smart" template based on input
-    // This mocks the AI logic for the demo
-    let style: MemeResponse['bg_style'] = 'TERMINAL_MONITOR_GLOW';
-    if (ctx.persona === 'PerpGoat') style = 'GOAT_SUMMIT_GOLD';
-    if (ctx.persona === 'PerpShark') style = 'SHARK_TRENCH_ABYSS';
-    if (ctx.persona === 'WhaleBot') style = 'WHALE_DEPTH_METAL';
-    if (ctx.pnl_pct < -20) style = 'CASINO_RUG_ALERT';
-    if (ctx.context_text.toLowerCase().includes('pump')) style = 'APE_CANDLE_FOREST';
-
-    const headlines = [
-        `COMPUTE SAYS UP ONLY.`,
-        `JEETS SELLING ${ctx.asset}? THANKS.`,
-        `LIQUIDATION CASCADE INBOUND.`,
-        `${ctx.leverage}x LEVERAGE IS A LIFESTYLE.`,
-        `ALGO DETECTED WEAK HANDS.`,
-        `GOD CANDLE LOADING...`,
-        `YOUR STOP LOSS IS MY ENTRY.`
-    ];
-    
-    const sublines = [
-        `Nature is healing.`,
-        `Argue with the metal.`,
-        `Imagine selling right now.`,
-        `Funding flipped. Send it.`,
-        `Gpu cluster active.`,
-        `Deploying capital.`
-    ];
-
-    // TRUMP MODE OVERRIDE
-    if (ctx.context_text.toLowerCase().includes('trump') || ctx.context_text.toLowerCase().includes('maga')) {
-        return {
-            headline: `WE ARE BUILDING A HUGE WALL OF BIDS!`,
-            subline: `And the Jeets are going to pay for it.`,
-            tone: "MAX_DEGEN",
-            risk_vibe: "PRESIDENTIAL PUMP",
-            bg_style: "GOAT_SUMMIT_GOLD",
-            hashtags: ["#maga", "#btc", "#pump"]
-        };
+    // TRUMP MODE (Special JSON)
+    if (ctx.persona === 'TRUMP') {
+        return JSON.stringify({
+            "president": "DONALD J. TRUMP",
+            "asset": ctx.asset,
+            "status": "HUGE",
+            "jeets": "DEPORTED",
+            "chart": "BEAUTIFUL",
+            "china_ban": false,
+            "prediction": "MOON",
+            "message": "WE ARE GOING TO WIN SO MUCH WITH BITCOIN YOU WILL BE TIRED OF WINNING."
+        }, null, 2);
     }
 
-    return {
-        headline: headlines[Math.floor(Math.random() * headlines.length)],
-        subline: sublines[Math.floor(Math.random() * sublines.length)],
-        tone: "MAX_DEGEN",
-        risk_vibe: `${ctx.leverage}x ${ctx.side} ON ${ctx.asset}`,
-        bg_style: style,
-        hashtags: ["#whaleperp", "#" + ctx.asset.toLowerCase(), "#realyield"]
+    // STANDARD TRENCH JSON
+    const isRekt = ctx.pnl_pct < -10;
+    const isPump = ctx.side === 'LONG';
+    
+    const payload = {
+        "timestamp": new Date().toISOString(),
+        "engine": "WHALE_OS_v3.6",
+        "signal_id": Math.random().toString(36).substring(7).toUpperCase(),
+        "market_context": {
+            "asset": ctx.asset,
+            "price_action": isPump ? "PARABOLIC" : "DUMPING",
+            "funding_rate": ctx.funding,
+            "volatility_index": "EXTREME"
+        },
+        "analysis": {
+            "sentiment": isRekt ? "MAX_PAIN" : "EUPHORIA",
+            "weak_hands": "FLUSHED",
+            "smart_money": "ACCUMULATING",
+            "probability_of_god_candle": 0.98
+        },
+        "execution": {
+            "side": ctx.side,
+            "leverage": `${ctx.leverage}x`,
+            "pnl_status": isRekt ? "LIQUIDATION_IMMINENT" : "PRINTING",
+            "instruction": "SEND_IT"
+        },
+        "message": ctx.context_text.toUpperCase() || "COMPUTE SAYS UP ONLY."
     };
+
+    return JSON.stringify(payload, null, 2);
 };
 
-export const renderMemeToCanvas = (data: MemeResponse, canvas: HTMLCanvasElement) => {
+// RENDERER: Draws the JSON string onto a Canvas looking like a VS Code / Terminal window
+export const renderMemeToCanvas = (jsonStr: string, canvas: HTMLCanvasElement) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const w = canvas.width;
     const h = canvas.height;
-    const style = BG_PRESETS[data.bg_style] || BG_PRESETS['TERMINAL_MONITOR_GLOW'];
 
-    // 1. Gradient Background
-    const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, style.gradientFrom);
-    grad.addColorStop(1, style.gradientTo);
-    ctx.fillStyle = grad;
+    // 1. Background (VS Code Dark)
+    ctx.fillStyle = '#1e1e1e'; 
     ctx.fillRect(0, 0, w, h);
 
-    // 2. Procedural FX Layers
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = style.accent + '40'; // Low opacity
-
-    if (style.shape === 'GRID') {
-        for (let x = 0; x < w; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-        for (let y = 0; y < h; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-    }
-    
-    if (style.shape === 'RINGS') {
-        for(let i=0; i<5; i++) {
-            ctx.beginPath();
-            ctx.arc(w/2, h/2, 50 + (i*80), 0, Math.PI * 2);
-            ctx.stroke();
-        }
-    }
-
-    if (style.shape === 'PEAKS') {
-        ctx.beginPath();
-        ctx.moveTo(0, h);
-        for(let x=0; x<=w; x+=10) {
-            ctx.lineTo(x, h - (Math.random() * 200));
-        }
-        ctx.lineTo(w, h);
-        ctx.fillStyle = style.accent + '20';
-        ctx.fill();
-    }
-
-    if (style.shape === 'CHAOS') {
-        for(let i=0; i<20; i++) {
-            ctx.beginPath();
-            ctx.moveTo(Math.random()*w, Math.random()*h);
-            ctx.lineTo(Math.random()*w, Math.random()*h);
-            ctx.stroke();
-        }
-    }
-
-    // 3. Text Rendering (Impact Style)
+    // 2. Header Bar (Mac Style)
+    ctx.fillStyle = '#252526';
+    ctx.fillRect(0, 0, w, 40);
+    // Traffic Lights
+    ctx.beginPath(); ctx.arc(20, 20, 6, 0, Math.PI*2); ctx.fillStyle = '#ff5f56'; ctx.fill();
+    ctx.beginPath(); ctx.arc(40, 20, 6, 0, Math.PI*2); ctx.fillStyle = '#ffbd2e'; ctx.fill();
+    ctx.beginPath(); ctx.arc(60, 20, 6, 0, Math.PI*2); ctx.fillStyle = '#27c93f'; ctx.fill();
+    // Title
+    ctx.fillStyle = '#cccccc';
+    ctx.font = '12px monospace';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    // Headline
-    ctx.font = '900 60px "Inter", sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = style.accent;
-    ctx.shadowBlur = 20;
-    ctx.fillText(data.headline.toUpperCase(), w/2, h/2 - 20);
+    ctx.fillText('whale_alpha_signal.json — -bash — 80x24', w/2, 24);
 
-    // Subline
-    ctx.font = 'bold 30px "Courier New", monospace';
-    ctx.fillStyle = style.accent;
-    ctx.shadowBlur = 0;
-    ctx.fillText(data.subline, w/2, h/2 + 50);
-
-    // 4. Footer Meta
-    ctx.font = 'bold 16px monospace';
-    ctx.fillStyle = '#ffffff';
+    // 3. JSON Syntax Highlighting Logic
     ctx.textAlign = 'left';
-    ctx.fillText("WHALEPERP.ETH", 30, h - 30);
+    ctx.textBaseline = 'top';
+    const fontSize = 20; // Bigger font for readability
+    ctx.font = `bold ${fontSize}px "Courier New", monospace`;
     
+    const lines = jsonStr.split('\n');
+    let y = 60;
+    const x = 30;
+    const lineHeight = 28;
+
+    lines.forEach(line => {
+        // Simple syntax coloring regex
+        // Keys (orange), Strings (green), Numbers (blue), Booleans (purple)
+        
+        // Draw Key (e.g. "timestamp":)
+        const keyMatch = line.match(/"(.*?)":/);
+        if (keyMatch) {
+            const keyText = keyMatch[0];
+            const valText = line.substring(line.indexOf(':') + 1);
+            
+            const indent = line.search(/\S/);
+            const indentStr = line.substring(0, indent);
+            
+            // Indent
+            ctx.fillStyle = '#d4d4d4';
+            ctx.fillText(indentStr, x, y);
+            
+            // Key (Blue/Light Blue like VS Code)
+            ctx.fillStyle = '#9cdcfe';
+            const keyWidth = ctx.measureText(indentStr).width;
+            ctx.fillText(keyMatch[1], x + keyWidth + ctx.measureText('"').width, y); // key name
+            ctx.fillStyle = '#d4d4d4'; // quotes & colon
+            ctx.fillText('":', x + keyWidth + ctx.measureText('"' + keyMatch[1]).width, y);
+            ctx.fillText('"', x + keyWidth, y);
+
+            // Value Parsing
+            const valX = x + ctx.measureText(indentStr + keyText + ' ').width;
+            const cleanVal = valText.trim().replace(/,$/, '');
+            
+            if (cleanVal.startsWith('"')) {
+                ctx.fillStyle = '#ce9178'; // String (Orange/Red)
+            } else if (cleanVal === 'true' || cleanVal === 'false') {
+                ctx.fillStyle = '#569cd6'; // Boolean (Blue)
+            } else if (!isNaN(Number(cleanVal))) {
+                ctx.fillStyle = '#b5cea8'; // Number (Green)
+            } else {
+                ctx.fillStyle = '#d4d4d4'; // Default
+            }
+            ctx.fillText(valText.trim(), valX, y);
+
+        } else {
+            // Brackets / Plain text
+            ctx.fillStyle = '#d7ba7d'; // Brackets (Yellowish)
+            ctx.fillText(line, x, y);
+        }
+        
+        y += lineHeight;
+    });
+
+    // 4. Watermark
+    ctx.fillStyle = '#333333';
+    ctx.font = 'bold 40px sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillStyle = style.accent;
-    ctx.fillText(data.risk_vibe, w - 30, h - 30);
+    ctx.fillText('WHALEPERP.ETH', w - 30, h - 30);
 };
