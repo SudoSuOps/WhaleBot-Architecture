@@ -3,7 +3,6 @@ import { MemeContext, MemeResponse } from '../types';
 export const generateMemeJSON = async (ctx: MemeContext): Promise<string> => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    // TRUMP MODE (Special JSON)
     if (ctx.persona === 'TRUMP') {
         return JSON.stringify({
             "president": "DONALD J. TRUMP",
@@ -17,7 +16,6 @@ export const generateMemeJSON = async (ctx: MemeContext): Promise<string> => {
         }, null, 2);
     }
 
-    // STANDARD TRENCH JSON
     const isRekt = ctx.pnl_pct < -10;
     const isPump = ctx.side === 'LONG';
     
@@ -49,93 +47,99 @@ export const generateMemeJSON = async (ctx: MemeContext): Promise<string> => {
     return JSON.stringify(payload, null, 2);
 };
 
-// RENDERER: Draws the JSON string onto a Canvas looking like a VS Code / Terminal window
 export const renderMemeToCanvas = (jsonStr: string, canvas: HTMLCanvasElement) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
 
-    // 1. Background (VS Code Dark)
-    ctx.fillStyle = '#1e1e1e'; 
+    // High-DPI Scaling
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const w = rect.width;
+    const h = rect.height;
+
+    // 1. Background (Deep Obsidian)
+    ctx.fillStyle = '#09090b'; 
     ctx.fillRect(0, 0, w, h);
 
-    // 2. Header Bar (Mac Style)
-    ctx.fillStyle = '#252526';
-    ctx.fillRect(0, 0, w, 40);
+    // 2. Header Bar
+    ctx.fillStyle = '#18181b';
+    ctx.fillRect(0, 0, w, 44);
     // Traffic Lights
-    ctx.beginPath(); ctx.arc(20, 20, 6, 0, Math.PI*2); ctx.fillStyle = '#ff5f56'; ctx.fill();
-    ctx.beginPath(); ctx.arc(40, 20, 6, 0, Math.PI*2); ctx.fillStyle = '#ffbd2e'; ctx.fill();
-    ctx.beginPath(); ctx.arc(60, 20, 6, 0, Math.PI*2); ctx.fillStyle = '#27c93f'; ctx.fill();
+    ctx.beginPath(); ctx.arc(22, 22, 6, 0, Math.PI*2); ctx.fillStyle = '#ef4444'; ctx.fill();
+    ctx.beginPath(); ctx.arc(42, 22, 6, 0, Math.PI*2); ctx.fillStyle = '#eab308'; ctx.fill();
+    ctx.beginPath(); ctx.arc(62, 22, 6, 0, Math.PI*2); ctx.fillStyle = '#22c55e'; ctx.fill();
     // Title
-    ctx.fillStyle = '#cccccc';
-    ctx.font = '12px monospace';
+    ctx.fillStyle = '#71717a';
+    ctx.font = '600 12px "Geist Mono", monospace'; // Modern mono font preference
     ctx.textAlign = 'center';
-    ctx.fillText('whale_alpha_signal.json — -bash — 80x24', w/2, 24);
+    ctx.fillText('whale_alpha_signal.json — local — 80x24', w/2, 26);
 
-    // 3. JSON Syntax Highlighting Logic
+    // 3. Syntax Highlighting
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    const fontSize = 20; // Bigger font for readability
-    ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+    const fontSize = 15;
+    ctx.font = `500 ${fontSize}px "Courier New", monospace`;
     
     const lines = jsonStr.split('\n');
-    let y = 60;
-    const x = 30;
-    const lineHeight = 28;
+    let y = 70;
+    const x = 35;
+    const lineHeight = 24;
 
     lines.forEach(line => {
-        // Simple syntax coloring regex
-        // Keys (orange), Strings (green), Numbers (blue), Booleans (purple)
-        
-        // Draw Key (e.g. "timestamp":)
+        // Key regex: "key":
         const keyMatch = line.match(/"(.*?)":/);
+        
         if (keyMatch) {
-            const keyText = keyMatch[0];
-            const valText = line.substring(line.indexOf(':') + 1);
-            
             const indent = line.search(/\S/);
             const indentStr = line.substring(0, indent);
-            
-            // Indent
-            ctx.fillStyle = '#d4d4d4';
+            const keyName = keyMatch[1];
+            const valText = line.substring(line.indexOf(':') + 1);
+
+            // Draw Indent
+            ctx.fillStyle = '#3f3f46'; // zinc-700 invisible char color
             ctx.fillText(indentStr, x, y);
             
-            // Key (Blue/Light Blue like VS Code)
-            ctx.fillStyle = '#9cdcfe';
-            const keyWidth = ctx.measureText(indentStr).width;
-            ctx.fillText(keyMatch[1], x + keyWidth + ctx.measureText('"').width, y); // key name
-            ctx.fillStyle = '#d4d4d4'; // quotes & colon
-            ctx.fillText('":', x + keyWidth + ctx.measureText('"' + keyMatch[1]).width, y);
-            ctx.fillText('"', x + keyWidth, y);
+            // Draw Key (Sky Blue)
+            const keyX = x + ctx.measureText(indentStr).width;
+            ctx.fillStyle = '#7dd3fc'; // sky-300
+            ctx.fillText(`"${keyName}"`, keyX, y);
+            
+            // Draw Colon
+            const colonX = keyX + ctx.measureText(`"${keyName}"`).width;
+            ctx.fillStyle = '#a1a1aa'; // zinc-400
+            ctx.fillText(':', colonX, y);
 
-            // Value Parsing
-            const valX = x + ctx.measureText(indentStr + keyText + ' ').width;
+            // Draw Value
+            const valX = colonX + ctx.measureText(':').width;
             const cleanVal = valText.trim().replace(/,$/, '');
             
             if (cleanVal.startsWith('"')) {
-                ctx.fillStyle = '#ce9178'; // String (Orange/Red)
+                ctx.fillStyle = '#fbbf24'; // amber-400 (String)
             } else if (cleanVal === 'true' || cleanVal === 'false') {
-                ctx.fillStyle = '#569cd6'; // Boolean (Blue)
+                ctx.fillStyle = '#f472b6'; // pink-400 (Boolean)
             } else if (!isNaN(Number(cleanVal))) {
-                ctx.fillStyle = '#b5cea8'; // Number (Green)
+                ctx.fillStyle = '#34d399'; // emerald-400 (Number)
             } else {
-                ctx.fillStyle = '#d4d4d4'; // Default
+                ctx.fillStyle = '#e4e4e7'; // zinc-200
             }
-            ctx.fillText(valText.trim(), valX, y);
+            ctx.fillText(valText, valX, y);
 
         } else {
-            // Brackets / Plain text
-            ctx.fillStyle = '#d7ba7d'; // Brackets (Yellowish)
+            // Brackets/Braces
+            ctx.fillStyle = '#fbbf24'; // amber-400 for brackets
             ctx.fillText(line, x, y);
         }
-        
         y += lineHeight;
     });
 
     // 4. Watermark
-    ctx.fillStyle = '#333333';
-    ctx.font = 'bold 40px sans-serif';
+    ctx.fillStyle = '#27272a'; // zinc-800
+    ctx.font = '900 60px sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('WHALEPERP.ETH', w - 30, h - 30);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('WHALEPERP', w - 40, h - 20);
 };

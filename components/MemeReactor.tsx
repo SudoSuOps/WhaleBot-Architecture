@@ -24,7 +24,7 @@ const MemeReactor: React.FC<MemeReactorProps> = ({ positions = [], whaleFeed = [
         setIsGenerating(true);
         const ctx = {
             persona: personality,
-            asset: 'BTC', // Dynamic in real app
+            asset: 'BTC',
             side: 'LONG',
             leverage: 10,
             pnl_pct: 25.5,
@@ -38,15 +38,19 @@ const MemeReactor: React.FC<MemeReactorProps> = ({ positions = [], whaleFeed = [
     };
 
     useEffect(() => {
+        // Render whenever content changes
         if (jsonContent && canvasRef.current) {
-            renderMemeToCanvas(jsonContent, canvasRef.current);
+            // Wait for DOM layout
+            setTimeout(() => {
+                 if (canvasRef.current) renderMemeToCanvas(jsonContent, canvasRef.current);
+            }, 50);
         }
     }, [jsonContent]);
 
     const handleDownload = () => {
         if (canvasRef.current) {
             const link = document.createElement('a');
-            link.download = `whaleperp-signal-${Date.now()}.png`;
+            link.download = `whaleperp-artifact-${Date.now()}.png`;
             link.href = canvasRef.current.toDataURL();
             link.click();
         }
@@ -61,11 +65,12 @@ const MemeReactor: React.FC<MemeReactorProps> = ({ positions = [], whaleFeed = [
     return (
         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-8">
+                {/* CONSOLE */}
                 <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5"><Code size={150} /></div>
                     <div className="flex items-center gap-3 mb-6 relative z-10">
                         <div className="p-2 bg-whale-900 rounded-lg border border-trenchGold-500/50 shadow-[0_0_15px_rgba(255,215,0,0.2)]"><Code className="text-trenchGold-500" size={24} /></div>
-                        <div><h1 className="text-3xl font-black text-white tracking-tight leading-none">ARTIFACT GENERATOR</h1><p className="text-xs text-trenchPurple-400 font-mono tracking-widest">v1.5 // TERMINAL JSON MODE</p></div>
+                        <div><h1 className="text-3xl font-black text-white tracking-tight leading-none">ARTIFACT GENERATOR</h1><p className="text-xs text-trenchPurple-400 font-mono tracking-widest">v1.6 // TERMINAL JSON MODE</p></div>
                     </div>
 
                     <div className="space-y-6 relative z-10">
@@ -74,10 +79,16 @@ const MemeReactor: React.FC<MemeReactorProps> = ({ positions = [], whaleFeed = [
                     </div>
                 </div>
 
+                {/* CANVAS PREVIEW */}
                 <div className={`bg-whale-900 border border-whale-700 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 ${jsonContent ? 'opacity-100 scale-100' : 'opacity-50 scale-95'}`}>
-                    <div className="relative bg-[#1e1e1e] aspect-[16/10] flex items-center justify-center">
-                        {!jsonContent && <p className="text-slate-600 font-mono text-xs animate-pulse">AWAITING INPUT DATA...</p>}
-                        <canvas ref={canvasRef} width={1000} height={625} className={`w-full h-full ${!jsonContent && 'hidden'}`} />
+                    <div className="relative bg-[#09090b] w-full flex items-center justify-center p-4">
+                        {!jsonContent && <div className="absolute inset-0 flex items-center justify-center z-10"><p className="text-slate-600 font-mono text-xs animate-pulse">AWAITING INPUT DATA...</p></div>}
+                        {/* Canvas with explicit styling to ensure visibility */}
+                        <canvas 
+                            ref={canvasRef} 
+                            style={{ width: '100%', height: 'auto', maxWidth: '800px', borderRadius: '8px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
+                            className={`${!jsonContent && 'hidden'}`} 
+                        />
                     </div>
                     <div className="bg-whale-800 p-4 flex justify-between items-center border-t border-whale-700">
                         <div className="flex gap-2"><button onClick={handleDownload} disabled={!jsonContent} className="p-2 bg-whale-700 hover:bg-whale-600 rounded text-slate-300 transition-colors flex items-center gap-2 text-xs font-bold px-4 border border-whale-600 disabled:opacity-50"><Download size={14}/> DOWNLOAD ARTIFACT</button></div>
