@@ -1,16 +1,20 @@
-import { MacroEvent, WhaleTransaction } from '../types';
-
 const PERSONALITIES = {
-    'PERPGOAT': "You are PerpGoat, a chaotic degenerate trader who loves leverage and hates 'jeets'. Use caps lock, emojis, and slang like 'rekt', 'alpha', 'wagmi'.",
-    'PERPSHARK': "You are PerpShark, a cold, calculating predator. You eat liquidity. You mock weak hands. Short sentences. Ruthless.",
-    'WHALEBOT': "You are WhaleBot, a dry, sarcastic AI running on 5090s. You find human trading errors amusingly inefficient.",
-    'PERPJEET': "You are PerpJeet, constantly scared, selling the bottom, buying the top. Panic mode always."
+    'PERPGOAT': "You are PerpGoat. Capra hircus degenerus. You love leverage. You hate jeets. You speak in capslock.",
+    'PERPSHARK': "You are PerpShark. Cold. Liquidator. You smell blood. Short sentences.",
+    'WHALEBOT': "You are WhaleBot AI. Analytical but condescending. You see humans as liquidity.",
+    'PERPJEET': "You are PerpJeet. Nervous. Paper hands. Always selling the bottom."
 };
 
+const BACKGROUNDS = [
+    'https://placehold.co/800x400/1a1a2e/e94560?text=LIQUIDATION+CASCADE',
+    'https://placehold.co/800x400/0f3460/e94560?text=WOJAK+PAIN',
+    'https://placehold.co/800x400/16213e/0f3460?text=CHAD+WHALE',
+    'https://placehold.co/800x400/000000/00ff00?text=GREEN+GOD+CANDLE',
+    'https://placehold.co/800x400/222831/ffd700?text=GOLDEN+BULL'
+];
+
 export const generateMemeText = async (topic: string, personality: keyof typeof PERSONALITIES = 'WHALEBOT'): Promise<string> => {
-    // Simulate AI delay
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const templates = [
         `JUST WATCHED A $5M LONG GET LIQUIDATED. NATURE IS HEALING. 🐳`,
         `IMAGINE SELLING ${topic.toUpperCase()} RIGHT NOW. COULDN'T BE ME. 💎🙌`,
@@ -18,14 +22,15 @@ export const generateMemeText = async (topic: string, personality: keyof typeof 
         `MY GPUS ARE WARMER THAN YOUR PORTFOLIO.`,
         `JEETS SELLING ${topic.toUpperCase()}? THANKS FOR THE CHEAP COINS.`,
         `COMPUTE SAYS UP ONLY. ARGUE WITH THE METAL.`,
-        `DETECTED WEAK HANDS IN THE ORDERBOOK. DEPLOYING CAPITAL.`,
+        `DETECTED WEAK HANDS IN THE ORDERBOOK. DEPLOYING CAPITAL.`
     ];
-
     return templates[Math.floor(Math.random() * templates.length)];
 };
 
-export const generateMemeImage = async (text: string, templateId: string): Promise<string> => {
-    // In a real app, this would call Stable Diffusion or Cloudflare Images
-    // Here we return a placeholder URL that the component will render nicely
-    return `https://via.placeholder.com/800x400/150a33/ffd700?text=${encodeURIComponent(text)}`;
+export const generateMemeImage = (text: string): string => {
+    // Return a random visual template
+    const base = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)];
+    // In a real app with Cloudflare Images, we would layer the text here.
+    // For now, we return the base to visualize variation.
+    return base;
 };
