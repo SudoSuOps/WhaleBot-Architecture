@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Image as ImageIcon, Share2, Twitter, Copy, Zap, RefreshCw, Aperture, Skull, Smile, Download } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Share2, Twitter, Copy, Zap, RefreshCw, Aperture, Skull, Smile, Download, Crown } from 'lucide-react';
 import { generateMemeText, generateMemeImage } from '../services/memeService';
 import { WhaleLogoIcon } from './BrandAssets';
 
 const PERSONALITIES = [
     { id: 'WHALEBOT', name: 'WhaleBot AI', icon: <Zap size={16} className="text-diamond-500"/>, color: 'border-diamond-500/30 text-diamond-400' },
     { id: 'PERPGOAT', name: 'PerpGoat', icon: <Skull size={16} className="text-rose-500"/>, color: 'border-rose-500/30 text-rose-400' },
-    { id: 'PERPSHARK', name: 'PerpShark', icon: <Aperture size={16} className="text-trenchGold-500"/>, color: 'border-trenchGold-500/30 text-trenchGold-400' },
+    { id: 'TRUMP', name: 'DONALD PUMP', icon: <Crown size={16} className="text-trenchGold-500"/>, color: 'border-trenchGold-500/30 text-trenchGold-400 bg-trenchGold-500/10' },
+    { id: 'PERPSHARK', name: 'PerpShark', icon: <Aperture size={16} className="text-blue-500"/>, color: 'border-blue-500/30 text-blue-400' },
     { id: 'PERPJEET', name: 'PerpJeet', icon: <Smile size={16} className="text-emerald-500"/>, color: 'border-emerald-500/30 text-emerald-400' },
 ];
 
@@ -50,19 +51,19 @@ const MemeReactor: React.FC = () => {
             <div className="lg:col-span-2 space-y-8">
                 <div className="bg-whale-800 border border-trenchGold-500/30 rounded-xl p-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5"><Sparkles size={150} /></div>
-                    <div className="flex items-center gap-3 mb-6 relative z-10"><Sparkles className="text-trenchGold-500" size={28} /><h1 className="text-3xl font-black text-white tracking-tight">DEGEN MEME REACTOR <span className="text-xs text-trenchPurple-500 ml-2 bg-trenchPurple-500/10 px-2 py-1 rounded font-mono border border-trenchPurple-500/30">v1.1</span></h1></div>
+                    <div className="flex items-center gap-3 mb-6 relative z-10"><Sparkles className="text-trenchGold-500" size={28} /><h1 className="text-3xl font-black text-white tracking-tight">DEGEN MEME REACTOR <span className="text-xs text-trenchPurple-500 ml-2 bg-trenchPurple-500/10 px-2 py-1 rounded font-mono border border-trenchPurple-500/30">v1.2</span></h1></div>
                     <div className="space-y-6 relative z-10">
-                        <div><label className="text-xs text-slate-400 uppercase tracking-wider mb-3 block font-bold">Select Personality Engine</label><div className="grid grid-cols-2 md:grid-cols-4 gap-3">{PERSONALITIES.map(p => (<button key={p.id} onClick={() => setPersonality(p.id)} className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${personality === p.id ? `bg-whale-900 ${p.color} shadow-[0_0_15px_rgba(0,0,0,0.3)] ring-1 ring-white/10` : 'bg-whale-900/50 border-whale-700 text-slate-500 hover:text-slate-300'}`}>{p.icon} <span className="text-xs font-bold">{p.name}</span></button>))}</div></div>
-                        <div className="flex gap-2"><input type="text" value={topic} onChange={e => setTopic(e.target.value)} className="flex-1 bg-whale-900 border border-whale-700 rounded-lg px-4 py-3 text-white focus:border-trenchGold-500 outline-none font-mono" placeholder="Enter topic..." /><button onClick={handleGenerate} disabled={isGenerating} className="bg-trenchGold-500 hover:bg-trenchGold-400 text-whale-900 font-bold px-6 py-3 rounded-lg transition-transform active:scale-95 flex items-center gap-2">{isGenerating ? <RefreshCw className="animate-spin" size={20}/> : <Zap size={20} fill="currentColor"/>} GENERATE</button></div>
+                        <div><label className="text-xs text-slate-400 uppercase tracking-wider mb-3 block font-bold">Select Personality Engine</label><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">{PERSONALITIES.map(p => (<button key={p.id} onClick={() => setPersonality(p.id)} className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${personality === p.id ? `bg-whale-900 ${p.color} shadow-[0_0_15px_rgba(0,0,0,0.3)] ring-1 ring-white/10` : 'bg-whale-900/50 border-whale-700 text-slate-500 hover:text-slate-300'}`}>{p.icon} <span className="text-xs font-bold">{p.name}</span></button>))}</div></div>
+                        <div className="flex gap-2"><input type="text" value={topic} onChange={e => setTopic(e.target.value)} className="flex-1 bg-whale-900 border border-whale-700 rounded-lg px-4 py-3 text-white focus:border-trenchGold-500 outline-none font-mono" placeholder="Enter topic (e.g. ETH, TRUMP, JEETS)..." /><button onClick={handleGenerate} disabled={isGenerating} className="bg-trenchGold-500 hover:bg-trenchGold-400 text-whale-900 font-bold px-6 py-3 rounded-lg transition-transform active:scale-95 flex items-center gap-2">{isGenerating ? <RefreshCw className="animate-spin" size={20}/> : <Zap size={20} fill="currentColor"/>} GENERATE</button></div>
                     </div>
                 </div>
                 {generatedContent && (
-                    <div className="bg-whale-900 border border-whale-700 rounded-xl overflow-hidden shadow-2xl">
+                    <div className="bg-whale-900 border border-whale-700 rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
                         <div className="aspect-video bg-black relative flex items-center justify-center p-12 text-center group overflow-hidden">
                             <img src={bgImage} alt="Meme Background" className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" />
                             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-trenchGold-500/10 to-trenchPurple-500/20"></div>
                             <div className="absolute bottom-4 right-4 opacity-50 flex items-center gap-2"><WhaleLogoIcon className="w-6 h-6"/><span className="text-xs font-black text-white tracking-widest">WHALEPERP.ETH</span></div>
-                            <div className="relative z-10"><h2 className="text-3xl md:text-4xl font-black text-white leading-tight drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] font-sans uppercase italic">"{generatedContent}"</h2></div>
+                            <div className="relative z-10"><h2 className="text-3xl md:text-5xl font-black text-white leading-tight drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] font-sans uppercase italic">"{generatedContent}"</h2></div>
                         </div>
                         <div className="bg-whale-800 p-4 flex justify-between items-center border-t border-whale-700">
                             <div className="flex gap-2"><button className="p-2 bg-whale-700 hover:bg-whale-600 rounded text-slate-300 transition-colors flex items-center gap-2 text-xs font-bold px-3"><Download size={14}/> SAVE</button><button className="p-2 bg-whale-700 hover:bg-whale-600 rounded text-slate-300 transition-colors"><Copy size={18}/></button></div>
